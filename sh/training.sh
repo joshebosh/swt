@@ -39,6 +39,8 @@ sms_error () {
     printf "%s\n" "$MSG"
     printf "error on line %s\n" "${2:-}"
 
+    read -p "pausing preseed until <enter> is encountered"
+
     exit 193
 
 }
@@ -64,8 +66,7 @@ if [ "$version" == 10 ]; then
 elif [ "$version" == 9 ]; then
     RELEASE="stretch"
 else
-    printf "OS not suitable for this script. Use Debian 8 or 9... exiting script\n"
-    exit 0
+    printf "OS not suitable for this script. Use Debian 8 or 9... exiting script\n" && sms_error $FUNCNAME $LINENO
 fi
 
 if [ $(grep -c -e "^PermitRootLogin yes") -eq 0 ]; then
@@ -355,7 +356,7 @@ if [ $(dpkg -l | grep -c libapache2-mod-php) -eq 0 ] || [ $(dpkg -l | ache2ctl -
     php -r "if (hash_file('sha384', 'composer-setup.php') === '48e3236262b34d30969dca3c37281b3b4bbe3221bda826ac6a9a62d6444cdb0dcd0615698a5cbe587c3f0fe57a54d8f5') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" 2>&1 | tee -a $ELOG || sms_error $FUNCNAME $LINENO
     php composer-setup.php 2>&1 | tee -a $ELOG || sms_error $FUNCNAME $LINENO
     php -r "unlink('composer-setup.php');" 2>&1 | tee -a $ELOG || sms_error $FUNCNAME $LINENO
-    
+
     if [ $(ls -l | grep -c "composer.phar") -gt 0 ]; then
 	a2enmod php7.3 2>&1 | tee -a $ELOG || sms_error $FUNCNAME $LINENO
 	phpenmod curl xml 2>&1 | tee -a $ELOG || sms_error $FUNCNAME $LINENO
@@ -413,5 +414,8 @@ popd
 #
 
 if [[ $SW_SPACE_URL && $SW_PHONE && $CELL_PHONE && $SW_PROJ_KEY && $SW_TOKEN ]]; then
-    signalwire_sms "installtion complete"
+    signalwire_sms "installation complete"
 fi
+
+printf "all done\n"
+exit 0

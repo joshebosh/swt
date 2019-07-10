@@ -1,6 +1,6 @@
-rm -rf /root/.bash_aliases && ln -s /usr/src/swt.git/root/.bash_aliases.sh /root/.bash_aliases.sh
-rm -rf /root/.bash_aliasxml && ln -s /usr/src/swt.git/root/.bash_aliasxml.sh /root/.bash_aliasxml.sh
-rm -rf /root/.bash_aliasxmlb && ln -s /usr/src/swt.git/root/.bash_aliasxmlb.sh /root/.bash_aliasxmlb.sh
+rm -rf /root/.bash_aliases.sh && ln -s /usr/src/swt.git/root/.bash_aliases.sh /root/.bash_aliases.sh
+rm -rf /root/.bash_aliasxml.sh && ln -s /usr/src/swt.git/root/.bash_aliasxml.sh /root/.bash_aliasxml.sh
+rm -rf /root/.bash_aliasxmlb.sh && ln -s /usr/src/swt.git/root/.bash_aliasxmlb.sh /root/.bash_aliasxmlb.sh
 rm -rf /root/.bashrc && ln -s /usr/src/swt.git/root/.bashrc /root/.bashrc
 rm -rf /root/.emacs.d && ln -s /usr/src/swt.git/root/.emacs.d /root/.emacs.d
 rm -rf /root/.screenrc && ln -s /usr/src/swt.git/root/.screenrc /root/.screenrc
