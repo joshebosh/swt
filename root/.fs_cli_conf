@@ -1,0 +1,83 @@
+; Put me in /etc/fs_cli.conf or ~/.fs_cli_conf
+
+[default]
+host => 127.0.0.1
+;user =>
+password => ClueCon
+port => 8021
+;batchmode =>
+debug => 2
+loglevel => 7
+;log-uuid => 1
+;log-uuid-short =>
+;log-uuid-length =>
+;quiet => 0
+;no-history-file => 0
+;COLORS: black, bold-black, red, bold-red, green, bold-green, yellow, bold-yellow, blue, bold-blue, magenta, bold-magenta, cyan, bold-cyan, white, bold-white
+prompt-color => red   ;not working?
+prompt-string => freeswitcha
+;input-text-color => green
+;output-text-color => red
+;timeout =>
+;connect-timeout =>
+key_f5 => /events plain all
+key_f6 => /nixevents RECV_RTCP_MESSAGE
+key_f7 => /noevents
+key_f8 =>
+key_f9 => fsctl send_sighup
+key_f10 => reloadxml
+key_f11 => hupall
+key_f12 => fsctl shutdown restart
+
+
+
+[custom]
+host => 127.0.0.1
+password => ClueCon
+port => 8021
+prompt-string => fscustom
+input-text-color => green
+output-text-color => red
+key_f1 => log console message
+key_f2 => log alert message
+key_f3 => log crit message
+key_f4 => log err message
+key_f5 => log warning message
+key_f6 => log notice message
+key_f7 => log info message
+key_f8 => log debug message
+key_f9 => fsctl send_sighup
+key_f10 => reloadxml
+key_f11 => hupall
+key_f12 => fsctl shutdown restart
+
+
+
+[fsb]
+host => 127.0.0.1
+;user => freeswitchb
+password => ClueCon
+port => 8022
+;batchmode =>
+debug => 2
+loglevel => 7
+;log-uuid => 1
+;log-uuid-short =>
+;log-uuid-length =>
+;quiet => 0
+;no-history-file => 0
+;COLORS: black, bold-black, red, bold-red, green, bold-green, yellow, bold-yellow, blue, bold-blue, magenta, bold-magenta, cyan, bold-cyan, white, bold-white
+prompt-color => red   ;not working?
+prompt-string => freeswitchb
+;input-text-color => green
+;output-text-color => red
+;timeout =>
+;connect-timeout =>
+key_f5 => /events plain all
+key_f6 => /nixevents RECV_RTCP_MESSAGE
+key_f7 => /noevents
+key_f8 =>
+key_f9 => fsctl send_sighup
+key_f10 => reloadxml
+key_f11 => hupall
+key_f12 => fsctl shutdown restart

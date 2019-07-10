@@ -1,0 +1,109 @@
+#/root/.screenrc
+
+startup_message off
+escape ^\b
+defscrollback 8000
+# status line at the bottom
+hardstatus on
+hardstatus alwayslastline
+hardstatus string "%{.rW}%-w%{.bW}%f%n %t%{-}%+w %=%{..G}[%H %l] %{..Y} %m/%d %c "
+
+screen -t bash 0 bash
+
+screen -t fsa 1 bash
+stuff 'fsa'^M
+screen -t fsb 2 bash
+stuff 'fsb'^M
+screen -t bash 3 bash
+screen -t bash 4 bash
+screen -t bash 5 bash
+screen -t bash 6 bash
+screen -t scripts 7 bash
+stuff 'scripts'^M
+screen -t freeswitch.git 8 bash
+stuff 'fss'^M
+screen -t swt.git 9 bash
+stuff 'swt.git'^M
+
+
+bindkey "^[^@" focus    # ctrl + alt + space
+bind ^? eval "clear" "scrollback 0" "scrollback 15000" "stuff ^M"
+
+# PUTTY
+bindkey "^[^[[C" next    # alt + shift + ri arrow
+bindkey "^[^[[D" prev     # alt + shift + le arrow
+
+# CHROME
+bindkey "^[[1;8C" next    # alt + shift + ri arrow
+bindkey "^[[1;8D" prev     # alt + shift + le arrow
+
+# Putty
+bindkey "^[[11~" layout select F1
+bindkey "^[[12~" layout select F2
+bindkey "^[[13~" layout select F3
+bindkey "^[[14~" layout select F4
+
+# Proxmox Console
+bindkey "^[[[A" layout select F1
+bindkey "^[[[B" layout select F2
+bindkey "^[[[C" layout select F3
+bindkey "^[[[D" layout select F4
+
+# Chrome Secure Shell
+bindkey "^[OP" layout select F1
+bindkey "^[OQ" layout select F2
+bindkey "^[OR" layout select F3
+bindkey "^[OS" layout select F4
+
+# Putty & CHROME
+bindkey "^[1" select 1    # Alt + 1
+bindkey "^[2" select 2    # Alt + 2
+bindkey "^[3" select 3    # Alt + 3
+bindkey "^[4" select 4    # Alt + 4
+bindkey "^[5" select 5    # Alt + 5
+bindkey "^[6" select 6    # Alt + 6
+bindkey "^[7" select 7    # Alt + 7
+bindkey "^[8" select 8    # Alt + 8
+bindkey "^[9" select 9    # Alt + 9
+bindkey "^[0" select 0    # Alt + 0
+
+layout new F1
+select 0
+
+layout new F2
+split
+select 2
+focus
+select 1
+
+layout new F3
+split
+select 4
+split -v
+focus
+select 5
+focus
+select 3
+
+layout new F4
+split
+select 8
+split -v
+focus
+select 9
+focus
+select 6
+split -v
+focus
+select 7
+focus
+
+layout select F1
+
+
+# PuTTY and Chrome
+bindkey "^[)" eval 'stuff "export UUID=\$(fs_cli -x \"show channels\" | grep swt | awk -F \047,\047 \047{print \$1}\047)"^M' "source /usr/src/swt.git/root/.screen-esl" 'stuff "screen -X bindkey \042\136\133\041\042 stuff \042sendmsg \044UUID\136Mcall-command: execute\136Mexecute-app-name: answer\136M\136M\042"^M' 'stuff "screen -X bindkey \042\136\133\100\042 stuff \042sendmsg \044UUID\136Mcall-command: execute\136Mexecute-app-name: playback\136Mexecute-app-arg: tone_stream://%(2000,4000,440,480);loops=-1\136M\136M\042"^M' 'stuff "screen -X bindkey \042\136\133\043\042 stuff \042sendmsg \044UUID\136Mcall-command: execute\136Mexecute-app-name: loop_playback\136Mexecute-app-arg: +2 \\044\\044{sounds_dir}/Tomtoms.wav\136M\136M\042"^M' 'stuff "screen -X bindkey \042\136\133\044\042 stuff \042sendmsg \044UUID\136Mcall-command: execute\136Mexecute-app-name: break\136M\136M\042"^M' 'stuff "screen -X bindkey \042\136\133\045\042 stuff \042sendmsg \044UUID\136Mcall-command: execute\136Mexecute-app-name: echo\136M\136M\042"^M' 'stuff "screen -X bindkey \042\136\133\036\042 stuff \042sendmsg \044UUID\136Mcall-command: execute\136Mexecute-app-name: hangup\136M\136M\042"^M'
+
+
+
+#'stuff "screen -X bindkey \042\136\133\041\042 stuff \042sendmsg \044UUID\136Mcall-command: execute\136Mexecute-app-name: echo\136M\136M\042"^M'

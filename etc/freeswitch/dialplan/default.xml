@@ -1,0 +1,2265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<include>
+
+  <context name="default">
+
+    <extension name="SignalWire CONNECTORS in">
+      <condition field="destination_number" expression="^(\+NUMBER)$">
+	<action application="bridge" data="user/1000"/>
+      </condition>
+    </extension>
+
+    <extension name="signalwire CONNECTORS out">
+      <condition field="destination_number" expression="^(\+?\d{11})$">
+	<action application="answer"/>
+	<action application="bridge" data="sofia/gateway/signalwire/$1"/>
+      </condition>
+    </extension>
+
+
+    <extension name="check encryption">
+      <condition field="destination_number" expression="^(80246)$">
+	<action application="answer"/>
+	<action application="playback" data="silence_stream://5000"/>
+	<action application="lua" data="ensure_encryption.lua"/>
+	<action application="echo"/>
+      </condition>
+    </extension>
+
+    <extension name="python script">
+      <condition field="destination_number" expression="^80244$">
+	<action application="python" data="room"/>
+      </condition>
+    </extension>
+
+
+    <extension name="rtmp">
+      <condition field="destination_number" expression="^rtmp$" require-nested="false">
+	<!-- <action application="answer"/> -->
+	<action application="set" data="idOfClientSession=${uuid}" inline="true"/>
+	<condition field="${direction}" expression="inbound" break="on-false">
+	  <action application="log" data="ERR you are here..."/>
+	  <action application="record_session" data="{modname=mod_av}rtmp://192.168.150.3/live/joshebosh?idOfClientSession=${idOfClientSession}"/>
+	  <!-- <action application="record_session" data="{modname=mod_av}rtmp://192.168.150.3/live/joshebosh?test=1234&var=5678'"/> -->
+	</condition>
+	<action application="log" data="ERR you're now here..."/>
+	<action application="echo"/>
+      </condition>
+    </extension>
+
+    <extension name="nested_example">
+      <condition field="destination_number" expression="^2901$" require-nested="false">
+	<action application="log" data="ERR 1 Nest Level 1a"/>
+	<action application="log" data="ERR 2 Nest Level 1b"/>
+	<condition field="${direction}" expression="inbound" break="never">
+	  <action application="log" data="ERR 3 Nest Level 2a"/>
+	  <action application="log" data="ERR 4 Nest Level 2b"/>
+	  <condition field="${direction}" expression="inbound" break="never">
+	    <action application="log" data="ERR 5 Nest Level 3a"/>
+	    <action application="log" data="ERR 6 Nest Level 3b"/>
+	  </condition>
+	  <action application="log" data="ERR 7 Nest Level 2c"/>
+	  <action application="log" data="ERR 8 Nest Level 2d"/>
+	</condition>
+	<action application="log" data="ERR 9 Nest Level 1c"/>
+	<action application="log" data="ERR 10 Nest Level 1d"/>
+      </condition>
+    </extension>
+
+    <extension name="another_nested_example">
+      <condition field="destination_number" expression="^2902$" require-nested="false">
+	<action application="log" data="ERR 1 Nest Level 1a"/>
+	<action application="log" data="ERR 2 Nest Level 1a"/>
+        <condition field="${direction}" expression="inbound" break="never">
+	  <action application="log" data="ERR 3 Nest Level 2a"/>
+	  <action application="log" data="ERR 4 Nest Level 2b"/>
+	</condition>
+        <condition field="${direction}" expression="inbound" break="never">
+	  <action application="log" data="ERR 5 Nest Level 3a"/>
+	  <action application="log" data="ERR 6 Nest Level 3b"/>
+	</condition>
+        <condition field="${direction}" expression="inbound" break="never">
+	  <action application="log" data="ERR 7 Nest Level 2c"/>
+	  <action application="log" data="ERR 8 Nest Level 2d"/>
+	</condition>
+        <condition field="${direction}" expression="inbound" break="never">
+	  <action application="log" data="ERR 9 Nest Level 1c"/>
+	  <action application="log" data="ERR 10 Nest Level 1d"/>
+	  <action application="echo"/>
+	</condition>
+      </condition>
+    </extension>
+
+    <extension name="fax hearder">
+      <condition field="destination_number" expression="^(9999999.*)$">
+	<action application="answer"/>
+	<!-- <action application="set" data="fax_header_custom=To: Test's Recipient      From: Keith X'Murray" inline="true"/> -->
+	<!-- <action application="set" data="fax_header_custom=To: Test's Recipient      From: Keith X'Murray" inline="true"/> -->
+	<action application="set" data="fax_header=${fax_header_custom}" inline="true"/>
+	<action application="set" data="decoded_header=${url_decode(${fax_header_custom)}" inline="true"/>
+	<action application="log" data="warning fax_header=${fax_header}"/>
+	<action application="log" data="warning fax_header_custom=${fax_header_custom}"/>
+	<action application="log" data="warning decoded_header=${decoded_header}"/>
+	<action application="hangup"/>
+	<action application="transfer" data="$1 XML default"/>
+      </condition>
+    </extension>
+
+
+    <extension name="hangup all calls">
+      <condition field="destination_number" expression="^811$">
+	<action application="set" data="group_confirm_key=1"/>
+	<action application="set" data="group_confirm_file=phrase:testphrase2:${uuid}"/>
+	<action application="bridge" data="user/1007,user/1000"/>
+	<action application="eval" data="${hupall()}"/>
+      </condition>
+    </extension>
+
+    <extension name="bypass media hold">
+      <condition field="destination_number" expression="^2(1\d\d\d)$">
+	<action application="answer"/>
+	<!-- <action application="set" data="api_on_answer=`uuid_debug_media ${uuid} both on`"/> -->
+        <action application="set" data="bypass_media=true"/>
+        <action application="set" data="bypass_media_resume_on_hold=true"/>
+        <action application="set" data="bypass_media_after_hold=true"/>
+	<action application="set" data="bypass_keep_codec=true"/>
+	<!-- <action application="set" data="rtp_manual_rtp_bugs=ALWAYS_AUTO_ADJUST"/> -->
+	<action application="set" data="bleg_uuid=bleg-${create_uuid()}" inline="true"/>
+	<action application="bridge" data="{origination_uuid=${bleg_uuid},bypass_media_keep_codec=true,bypass_media_resume_on_hold=true,bypass_media_after_hold=true}user/$1"/>
+	<!-- <action application="bridge" data="{rtp_manual_rtp_bugs=ALWAYS_AUTO_ADJUST,origination_uuid=${bleg_uuid},bypass_media_keep_codec=true,bypass_media_resume_on_hold=true,bypass_media_after_hold=true}user/$1"/> -->
+	<!-- <action application="bridge" data="{api_on_answer_1='uuid_debug_media ${bleg_uuid} both on',rtp_manual_rtp_bugs=ALWAYS_AUTO_ADJUST,api_on_answer_2=`uuid_debug_media ${uuid} both on',origination_uuid=${bleg_uuid},bypass_media_keep_codec=true,bypass_media_resume_on_hold=true,bypass_media_after_hold=true}user/$1"/> -->
+      </condition>
+    </extension>
+
+
+    <!-- AGENT CALLS "3900-agent" THRU "3999-agent" -->
+    <extension name="conference agent">
+      <condition field="destination_number" expression="^(39\d{2})-agent$">
+	<!-- set conference flags to video canvas muting -->
+	<action application="set" data="conference_flags=video-mute-exit-canvas,video-required-for-canvas"/>
+
+	<!-- set member flags to start out with video muted -->
+	<action application="set" data="conference_member_flags=moderator,endconf,vmute"/>
+
+	<!-- insert an agent uuid into the hash table so we can operate on it when customer calls in below -->
+	<action application="hash" data="insert/my-agent-realm-$1/my-agent-key-$1/${uuid}"/>
+
+	<!-- set a hangup hook for the agent to delete the hash table value -->
+	<action application="set" data="api_hangup_hook=hash delete/my-agent-realm-$1/my-agent-key-$1"/>
+
+	<action application="conference" data="$1-${domain_name}@video-mcu-stereo"/>
+      </condition>
+    </extension>
+
+    <!-- CUSTOMER CALLS 3900 THRU 3999 -->
+    <extension name="convo conference customer">
+      <condition field="destination_number" expression="^(39\d{2})$">
+
+	<!-- get the agent uuid from hash table so we can operate with it -->
+	<action application="set" data="agent_uuid=${hash(select/my-agent-realm-$1/my-agent-key-$1)}" inline="true"/>
+
+	<!-- use the agent uuid to get the agents conference member id -->
+	<action application="set" data="agent_conf_member_id=${uuid_getvar(${agent_uuid} conference_member_id})}" inline="true"/>
+
+	<!-- eval the conference api, so when customer calls in, it unmutes the agent video -->
+	<action application="eval" data="${conference($1-${domain_name} unvmute ${agent_conf_member_id})" inline="true"/>
+
+	<!-- set a hangup hook so when customer leaves the agent will mute the video again -->
+	<action application="set" data="api_hangup_hook=conference $1-${domain} vmute ${agent_conf_member_id}"/>
+
+	<action application="conference" data="$1-${domain_name}@video-mcu-stereo"/>
+      </condition>
+    </extension>
+
+    <extension name="youtube live">
+      <condition field="destination_number" expression="youtube">
+	<action application="answer"/>
+	<action application="record" data="{modname=mod_av}rtmp://a.rtmp.youtube.com/live2/asdf45sdfd"/>
+      </condition>
+    </extension>
+
+    <extension name="dtube live">
+      <condition field="destination_number" expression="dtube">
+	<action application="answer"/>
+	<action application="record" data="{modname=mod_av}rtmp://stream.dtube.top/live/owjn96djpzatoot3"/>
+      </condition>
+    </extension>
+
+    <extension name="breakers" continue="true">
+      <!-- Condition 1 -->
+      <condition field="destination_number" expression="^11(901|log)$" break="never">
+	<action application="log" data="info you dialed $1, a match for 901"/>
+	<anti-action application="log" data="err you dialed $1, NOT a match for 901"/>
+      </condition>
+      <!-- Condition 2 -->
+      <condition field="destination_number" expression="^11(902|log)$" break="on-true">
+	<action application="log" data="info you dialed $1, a match a match for 902"/>
+	<anti-action application="log" data="err you dialed $1, NOT a match for 902"/>
+      </condition>
+      <!-- Condition 3 -->
+      <condition field="destination_number" expression="^11(903|log)$" break="on-false">
+	<action application="log" data="info you dialed $1, a match for 903"/>
+	<anti-action application="log" data="err you dialed $1, NOT a match for 903"/>
+      </condition>
+      <!-- Condition 4 catchall -->
+      <condition>
+	<action application="log" data="warning you landed on after all conditions were met."/>
+      </condition>
+    </extension>
+
+    <extension name="breaker_stop">
+      <!-- Conition 5 -->
+      <condition field="destination_number" expression="^11(901|902|903|log)$">
+	<action application="log" data="notice you landed here because of contine=yes in previous extension"/>
+      </condition>
+    </extension>
+
+    <extension name="catchall error message">
+      <condition field="destination_number" expression="^000[-\w]*$">
+	<action application="answer"/>
+	<action application="echo"/>
+      </condition>
+    </extension>
+
+    <extension name="chat1" continue="true">
+      <condition field="${source}" expression="^mod_sofia$">
+	<action application="set" data="chat_proto=sip"/>
+      </condition>
+    </extension>
+
+    <extension name="java outbound socket">
+      <condition field="destination_number" expression="^jaout|8025$">
+	<action application="socket" data="127.0.0.1:8025 sync full"/>
+      </condition>
+    </extension>
+
+    <extension name="java outbound socket">
+      <condition field="destination_number" expression="^jaout|8084$">
+	<action application="socket" data="127.0.0.1:8084 sync full"/>
+      </condition>
+    </extension>
+
+    <extension name="python outbound socket">
+      <condition field="destination_number" expression="^pyout|8024$">
+	<action application="socket" data="127.0.0.1:8024 async full"/>
+      </condition>
+    </extension>
+
+    <extension name="lua outbound socket">
+      <condition field="destination_number" expression="^luaout|8023$">
+	<action application="socket" data="127.0.0.1:8023 async full"/>
+      </condition>
+    </extension>
+
+    <extension name="netcat">
+      <condition field="destination_number" expression="^netcat|8026$">
+	<action application="socket" data="127.0.0.1:8026 async full"/>
+      </condition>
+    </extension>
+
+    <extension name="testconf">
+      <condition field="destination_number" expression="testconf$|^9977$">
+	<action application="conference" data="tmux@convob[+flags{endconf}]"/>
+      </condition>
+    </extension>
+
+    <extension name="playback">
+      <condition field="destination_number" expression="^play|7529$">
+        <action application="answer"/>
+        <action application="playback" data="misc/misc-freeswitch_is_state_of_the_art.wav"/>
+	<action application="sleep" data="5000"/>
+      </condition>
+    </extension>
+
+    <extension name="sip dialstring">
+      <condition field="destination_number" expression="^(test|8378)$">
+        <action application="answer"/>
+        <!-- <action application="deflect" data="sip:telephreak@voip.telephreak.org"/> -->
+        <!-- <action application="redirect" data="sip:telephreak@voip.telephreak.org"/> -->
+        <!-- <action application="bind_meta_app" data="1 a s bridge::sofia/internal/sip:telephreak@voip.telephreak.org"/> -->
+        <!-- <action application="sleep" data="10000"/> -->
+        <!-- <action application="bridge" data="sofia/internalssc/sip:music@iptel.org"/> -->
+	<action application="bridge" data="sofia/external/sip:8378@192.168.150.91:5080"/>
+      </condition>
+    </extension>
+
+    <!-- <extension name="group_dial_paging_zones"> -->
+      <!-- <condition field="destination_number" expression="^6010$" break="never"> -->
+	<!-- <action application="set" data="group_id_name=Teachers" inline="true"/> -->
+      <!-- </condition> -->
+      <!-- <condition field="destination_number" expression="^6001$" break="never"> -->
+	<!-- <action application="set" data="group_id_name=Principle" inline="true"/> -->
+      <!-- </condition> -->
+      <!-- <condition field="destination_number" expression="^6(\d{3})$"> -->
+	<!-- <action application="set" data="conference_auto_outcall_caller_id_name=${group_id_name}"/> -->
+        <!-- <action application="set" data="conference_auto_outcall_caller_id_number=$0"/> -->
+        <!-- <action application="set" data="conference_auto_outcall_timeout=60"/> -->
+        <!-- <action application="set" data="conference_auto_outcall_flags=mute"/> -->
+        <!-- <action application="set" data="conference_auto_outcall_announce=tone_stream://%(250,0,800)"/> -->
+        <!-- <action application="set" data="conference_auto_outcall_prefix={sip_auto_answer=true}"/> -->
+        <!-- <action application="set" data="sip_exclude_contact=${network_addr}"/> -->
+        <!-- <action application="conference_set_auto_outcall" data="${group_call(support)+A}"/> -->
+        <!-- <action application="conference" data="madboss_intercom1@default+flags{endconf|deaf}"/> -->
+      <!-- </condition> -->
+    <!-- </extension> -->
+
+
+    <extension name="throw fail">
+      <condition field="destination_number" expression="^tf(.*)">
+	<action application="set" data="failure_causes=USER_BUSY,USER_NOT_REGISTERED"/>
+        <action application="set" data="transfer_on_fail=USER_BUSY,USER_NOT_REGISTERED catch_fail XML default"/>
+        <action application="bridge" data="user/$1@${domain_name}"/>
+        <action application="log" data="CRIT ${uuid} has value hangup desposition of ${originate_disposition}"/>
+        <action application="log" data="CRIT ${uuid} has value sip_invite_failure_status of ${sip_invite_failure_status}"/>
+	<action application="playback" data="tone_stream://v=0;%(500,500,2000);loops=-1"/>
+      </condition>
+    </extension>
+
+    <extension name="catch fail">
+      <condition field="${destination_number}" expression="^catch_fail$"/>
+      <condition regex="any">
+        <regex field="${originate_disposition}" expression="USER_BUSY"/>
+        <regex field="${sip_invite_failure_status}" expression="486"/>
+        <regex field="${originate_disposition}" expression="USER_NOT_REGISTERED"/>
+        <regex field="${sip_invite_failure_status}" expression="480"/>
+        <action application="log" data="CRIT ${uuid} has value hangup desposition of ${originate_disposition}"/>
+        <action application="log" data="CRIT ${uuid} has value sip_invite_failure_status of ${sip_invite_failure_status}"/>
+        <action application="playback" data="tone_stream://v=0;%(500,1500,800);loops=-1"/>
+      </condition>
+    </extension>
+
+    <extension name="sip bye throw">
+      <condition field="destination_number" expression="^sf(.*)">
+	<action application="set" data="hangup_after_bridge=false"/>
+	<action application="set" data="sip_bye_h_X-Aleg=aleg"/>
+	<action application="bridge" data="{transfer_after_bridge=byeCatcher:XML:default,sip_bye_h_X-Bleg=bleg}user/$1@${domain_name}"/>
+	<action application="transfer" data="byeCatcher XML default"/>
+      </condition>
+    </extension>
+
+    <extension name="sip bye catch">
+      <condition field="${destination_number}" expression="^byeCatcher$"/>
+      <condition regex="any">
+	<regex field="${sip_bye_h_X-Aleg}" expression="aleg"/>
+	<regex field="${sip_bye_h_X-Bleg}" expression="bleg"/>
+	<action application="log" data="CRIT ${uuid} has value of [${sip_bye_h_X-Aleg}] or [${sip_bye_h_X-Bleg}] or both"/>
+	<action application="playback" data="tone_stream://v=0;%(500,1500,800);loops=-1"/>
+      </condition>
+    </extension>
+
+    <extension name="log">
+      <condition field="destination_number" expression="^(log|564)$">
+	<action application="answer"/>
+	<action application="sleep" data="2000"/>
+	<action application="playback" data="tone_stream://v=-45;%(100,50,1000);loops=4"/>
+	<action application="log" data="console Your console message"/>
+	<action application="log" data="alert Your alert message"/>
+	<action application="log" data="crit Your critical message"/>
+	<action application="log" data="err Your error message"/>
+	<action application="log" data="warning Your warning message"/>
+	<action application="log" data="notice Your notice message"/>
+	<action application="log" data="info Your information message"/>
+	<action application="log" data="debug Your debug message"/>
+      </condition>
+    </extension>
+
+
+    <extension name="fs_2_fs">
+      <condition field="destination_number" expression="^98(\d+)$">
+	<action application="bridge" data="sofia/external/sip:$1@0.0.0.0:5080"/>
+      </condition>
+    </extension>
+
+    <extension name="fsa_2_fsb">
+      <condition field="destination_number" expression="^99(\d+)$">
+	<action application="bridge" data="sofia/external/sip:$1@$${local_ip_v4}:5082"/>
+      </condition>
+    </extension>
+
+
+    <extension name="record">
+      <condition field="destination_number" expression="^record|732673$">
+	<action application="answer"/>
+	<action application="set" data="rtp_disable_hold=true"/>
+	<action application="set" data="record_filename=/var/www/html/fs/${strftime(%Y-%m-%d-%H-%M-%S)}_${uuid}.wav" inline="true"/>
+	<action application="set" data="RECORD_MIN_SEC=2"/>
+	<action application="set" data="RECORD_STEREO=true"/>
+	<!-- <action application="record" data="${record_filename}"/> -->
+	<action application="record_session" data="${record_filename}"/>
+	<action application="playback" data="tone_stream://%(200,100,500,400,300,50,25);loops=100"/>
+	<action application="playback" data="silence_stream://600000"/>
+      </condition>
+    </extension>
+
+    <extension name="stretto_conference_physical_bridge">
+      <condition field="destination_number" expression="^(4500)$">
+        <action application="answer"/>
+        <action application="conference" data="${1}@collab"/>
+      </condition>
+    </extension>
+
+    <extension name="#319"> <!-- also #864 -->
+      <condition field="destination_number" expression="^319(\d{4})$">
+	<action application="set" data="record_filename=/var/www/html/fs/${strftime(%Y-%m-%d-%H-%M-%S)}_${uuid}.wav" inline="true"/>
+	<action application="record_session" data="${record_filename}"/>
+	<action application="set" data="api_on_answer_01=${uuid_displace(${uuid} start tone_stream://%(1,10000,1);v=-20;%(500,1,800);loops=-1 0 rm}"/>
+	<action application="set" data="my_outbound_uuid=${create_uuid()}" inline="true"/>
+	<action application="set" data="api_on_answer_02=uuid_displace ${uuid} start misc/misc-more_info_wiki.wav 0 mux"/>
+	<action application="bridge" data="{origination_uuid=${my_outbound_uuid},api_on_answer='uuid_displace ${my_outbound_uuid} start misc/misc-more_info_wiki.wav 0 mux'}user/$1"/>
+      </condition>
+    </extension>
+
+    <extension name="#547">
+      <condition field="destination_number" expression="^#547(.*)$">
+	<action application="export" data="rtcp_mux=false"/>
+	<action application="export" data="rtcp_audio_interval_msec=5000"/>
+	<action application="bridge" data="user/$1"/>
+      </condition>
+    </extension>
+
+    <extension name="mod_avmd">
+      <condition field="destination_number" expression="^(avmd|2863)$">
+	<!--B2--><!-- <action application="set" data="api_on_answer=uuid_displace ${uuid} start ${sounds_dir}/Answering_Machine.wav 0 mux"/> -->
+
+	<action application="answer"/>
+	<action application="avmd_start" data="debug=1,inbound_channel=1,outbound_channel=1"/>
+
+	<!--B2--><!--<action application="playback" data="silence_stream://10000"/> -->
+
+	<!--A1--><action application="sleep" data="2000"/>
+	<!--A1--><action application="playback" data="tone_stream://%(1000,1,1000)"/>
+
+	<action application="avmd_stop"/>
+	<action application="echo"/>
+      </condition>
+    </extension>
+
+    <extension name="ZD-531">
+      <condition field="destination_number" expression="^(5822)$">
+	<action application="set" data="record_filename=/var/www/html/fs/${strftime(%Y-%m-%d-%H-%M-%S)}_${uuid}.wav" inline="true"/>
+	<action application="set" data="api_on_answer=uuid_record ${uuid} start ${record_filename}"/>
+        <action application="bridge" data="user/1006"/>
+      </condition>
+    </extension>
+
+    <extension name="test lua">
+      <condition field="destination_number" expression="^(lua|582)$">
+	<action application="lua" data="test.lua"/>
+	<!-- <action application="say" data="en CURRENT_TIME pronounced ${strftime_tz(Africa/Bamako %T)}"/> -->
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="amd_perl_test">
+      <condition field="destination_number" expression="^(595)$">
+	<action application="perl" data="$${script_dir}/amd.pl 0012665243_16317750438_20170825084653.wav"/>
+      </condition>
+    </extension>
+
+    <extension name="amd_test" continue="false">
+      <condition field="destination_number" expression="^(amd|263)$">
+	<!-- <action application="set" data="media_bug_answer_req=true"/> -->
+	<action application="set" data="amd_execute_on_machine=transfer machine_found XML default"/>
+	<action application="set" data="amd_execute_on_person=transfer person_found XML default"/>
+	<action application="set" data="amd_execute_on_unsure=transfer amd_unsure XML default"/>
+	<!-- <action application="set" data="api_on_answer=uuid_displace ${uuid} start ${sounds_dir}/Answering_Machine.wav 0 mr"/> -->
+	<action application="answer"/>
+	<action application="voice_start"/>
+
+	<action application="playback" data="silence_stream://100,1000"/>
+	<action application="playback" data="tone_stream://(2000,4000,440,480)"/>
+
+
+	<!-- <action application="waitforresult" data="ivr/ivr-one_moment_please.wav"/> -->
+	<!-- <action application="waitforresult"/> -->
+
+	<!-- <action application="sleep" data="200"/> -->
+	<!-- <action application="playback" data="tone_stream://%(200,100,500,400,300,50,25);loops=2"/> -->
+	<action application="sleep" data="20000"/>
+	<!-- <action application="log" data="CRIT AMD Result is => ${amd_status} => ${amd_result}"/> -->
+        <action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="Found Machine">
+      <condition field="destination_number" expression="^(machine_found)$">
+	<action application="playback" data="ivr/ivr-welcome_to_freeswitch.wav"/>
+	<action application="log" data="CRIT AMD result is => ${amd_status} and AMD Status is => ${amd_result}"/>
+        <action application="voice_stop"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="Found Person">
+      <condition field="destination_number" expression="^(person_found)$">
+	<action application="playback" data="misc/if_you_are_this_person.wav"/>
+	<action application="log" data="CRIT AMD result is => ${amd_status} and AMD Status is => ${amd_result}"/>
+        <action application="voice_stop"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="AMD Unsure">
+      <condition field="destination_number" expression="^(amd_unsure)$">
+	<action application="playback" data="misc/error.wav"/>
+	<action application="log" data="CRIT AMD result is => ${amd_status} and AMD Status is => ${amd_result}"/>
+        <action application="voice_stop"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="record silence energy">
+      <condition field="${destination_number}" expression="^311$">
+	<action application="answer"/>
+	<!-- <action application="lua" data="test.lua"/> -->
+        <action application="set" data="playback_terminator=#"/>
+	<action application="set" data="debug_energy_level=true"/>
+        <action application="record" data="/var/www/html/fs/${uuid}.wav 3 1 5"/>
+        <action application="info"/>
+        <action application="log" data="CRIT \n\n ${uuid} \n variable_slience_hits_exhausted = ${silence_hits_exhausted}"/>
+      </condition>
+    </extension>
+
+    <extension name="signalwire relay">
+      <condition field="destination_number" expression="^s?7?(\+\d{11})$">
+	<action application="answer"/>
+	<action application="bridge" data="sofia/gateway/signalwire_relay/$1"/>
+      </condition>
+    </extension>
+
+    <extension name="flowroute.com">
+      <condition field="destination_number" expression="^f?3?\+?(\d{11})$">
+	<!-- the authenticated way -->
+	<!-- <action application="set" data="effective_caller_id_name=joshebosh"/>  -->
+	<!-- <action application="set" data="effective_caller_id_number=18005551212"/>  -->
+	<!-- <action application="bridge" data="sofia/gateway/flowroute/$1"/> -->
+	<!-- the unauthenticated way -->
+	<action application="bridge" data="sofia/external/XXXXX*$1@us-east-va.sip.flowroute.com;transport=tcp"/>
+
+      </condition>
+    </extension>
+
+    <extension name="telnyx">
+      <condition field="destination_number" expression="^t?8?\+?(1?\d{10})$">
+        <action application="bridge" data="{continue_on_fail=true}sofia/gateway/telnyx/$1"/>
+      </condition>
+    </extension>
+
+    <extension name="domestic.twilio.short">
+      <condition field="destination_number" expression="^t?w?(1?\d{10})$">
+	<action application="set" data="effective_caller_id_number=18005551212"/>
+	<action application="set" data="effective_caller_id_name=${outbound_caller_id_name}"/>
+	<action application="bridge" data="sofia/gateway/Twilio-outbound/+$1"/>
+      </condition>
+    </extension>
+
+
+    <extension name="enterprise_bridge">
+      <condition field="destination_number" expression="^2387$">
+	<action application="answer"/>
+	<action application="bridge" data="
+	  <ignore_early_media=true>
+            {call_timeout=10}
+              [leg_timeout=5]
+                user/1000
+            , [leg_delay_start=5,leg_timeout=10]
+                user/1001
+       :_:
+            {call_timeout=20}
+              [leg_delay_start=10,leg_timeout=20]
+                sofia/external/sip:1000@${local_ip_v4}:5082
+            | [leg_delay_start=15,leg_timeout=15]
+               sofia/external/sip:1001@${local_ip_v4}:5082
+	  "/>
+     </condition>
+    </extension>
+
+    <extension name="echo delay">
+      <condition field="destination_number" expression="^echo_delay|32463$">
+	<action application="set" data="echo_encode_video=true"/>
+	<action application="answer"/>
+	<action application="delay_echo" data="2000"/>
+      </condition>
+    </extension>
+
+    <extension name="echo">
+      <condition field="destination_number" expression="^echo|3246$">
+	<action application="set" data="echo_encode_video=true"/>
+	<action application="answer"/>
+	<action application="echo"/>
+      </condition>
+    </extension>
+
+    <extension name="shout test">
+      <condition field="destination_number" expression="^shout|74688$">
+	<action application="answer"/>
+	<!-- <action application="playback" data="shout://listen.radionomy.com/Pianostation"/> -->
+	<action application="playback" data="shout://localhost/shout/alex_hold.mp3"/>
+      </condition>
+    </extension>
+
+    <extension name="watson_ws TTS test">
+      <condition field="destination_number" expression="^watson_ws|9288$">
+	<action application="speak" data="watson_ws|en-US_LisaVoice|Please hold while we connect you to the conference"/>
+      </condition>
+    </extension>
+
+    <extension name="watson ASR lua test">
+      <condition field="destination_number" expression="^watson|9282$">
+	<!-- <action application="answer"/> -->
+	<!-- <action application="detect_speech" data="watson default default default"/> -->
+	<!-- <action application="playback" data="silence_stream://90000000"/> -->
+	<action application="lua" data="watson_asr.lua"/>
+      </condition>
+    </extension>
+
+    <extension name="watson ASR javascript test">
+      <condition field="destination_number" expression="^watson|9285$">
+	<!-- <action application="detect_speech" data="watson default default default"/> -->
+        <!-- <action application="sleep" data="10000"/> -->
+      <action application="javascript" data="watson_asr.js"/>
+      </condition>
+    </extension>
+
+    <extension name="call center customer">
+      <condition field="destination_number" expression="996">
+	<action application="playback" data="ivr/ivr-hold_connect_call.wav"/>
+	<action application="callcenter" data="support@default"/>
+      </condition>
+    </extension>
+
+    <extension name="call center agent stuff">
+      <condition field="destination_number" expression="^(997)$">
+	<action application="set" data="transfer_after_bridge=997"/> <!-- Remove this if you just want to get a single call -->
+	<action application="sleep" data="300"/> <!-- Small delay for safety needs -->
+	<action application="set" data="res=${callcenter_config(agent set uuid ${caller_id_number}@${domain_name} '${uuid}')}" />
+	<action application="set" data="res=${callcenter_config(agent set type ${caller_id_number}@${domain_name} 'uuid-standby')}" />
+	<action application="set" data="res=${callcenter_config(agent set status ${caller_id_number}@${domain_name} 'Available (On Demand)')}" />
+	<action application="set" data="res=${callcenter_config(agent set state ${caller_id_number}@${domain_name} 'Waiting')}" />
+	<action application="set" data="cc_warning_tone=tone_stream://%(200,0,500,600,700)"/>
+	<action application="answer" />
+	<action application="playback" data="$${hold_music}"/>
+      </condition>
+      </extension>
+
+    <extension name="call center login">
+      <condition field="destination_number" expression="^agent-login|298$">
+	<action application="set" data="res=${callcenter_config(agent set status ${caller_id_number}@default 'Available')}" />
+	<action application="set" data="res=${callcenter_config(agent set state ${caller_id_number}@default 'Waiting')}" />
+	<action application="answer" data=""/>
+	<action application="sleep" data="500"/>
+	<action application="playback" data="ivr/ivr-you_are_now_logged_in.wav"/>
+	<action application="hangup" data=""/>
+      </condition>
+    </extension>
+
+    <extension name="call center logout">
+      <condition field="destination_number" expression="^agent-logout|299$">
+	<action application="set" data="res=${callcenter_config(agent set state ${caller_id_number}@default 'Idle')}" />
+	<action application="set" data="res=${callcenter_config(agent set status ${caller_id_number}@default 'Logged Out')}" />
+	<action application="answer" data=""/>
+	<action application="sleep" data="500"/>
+	<action application="playback" data="ivr/ivr-you_are_now_logged_out.wav"/>
+	<action application="hangup" data=""/>
+      </condition>
+    </extension>
+
+    <extension name="gentones">
+      <condition field="destination_number" expression="^(gentones|1998)$">
+	<action application="sleep" data="2000"/>
+	<action application="playback" data="tone_stream://%(200,0,500,600,700)"/>
+	<action application="sleep" data="1000"/>
+        <action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="no_more_funds">
+      <condition field="destination_number" expression="^(no_more_funds)$">
+	<action application="sleep" data="1000"/>
+        <action application="playback" data="$${sounds_dir}/no_more_funds.wav"/>
+        <action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="add_funds">
+      <condition field="destination_number" expression="^(add_funds)$">
+	<action application="sleep" data="1000"/>
+        <action application="nibblebill" data="adjust 2.00"/>
+        <action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="test-json-cdr">
+      <condition field="destination_number" expression="^(3533)$">
+	<!--	<action application="set" data="hold_events=true"/> -->
+	<action application="bridge" data="user/1010@${domain_name}"/>
+      </condition>
+    </extension>
+
+    <extension name="g722 test">
+      <condition field="destination_number" expression="^1999$">
+	<action application="answer"/>
+	<!-- 	<action application="set" data="absolute_codec_string=g722"/> -->
+	<action application="playback" data="local_stream://default"/>
+      </condition>
+    </extension>
+
+
+    <extension name="applicant interview">
+      <condition field="destination_number" expression="^2010$">
+	<action application="answer"/>
+	<action application="set" data="effective_caller_id_name=INTERVIEW"/>
+	<action application="bridge" data="sofia/external/sip:2000@24.112.99.40:5080"/>
+      </condition>
+    </extension>
+
+    <extension name="ascii YY ZZZ - to play ascii wav files">
+      <condition field="destination_number" expression="^ascii (\d{2}|\d{3}) (\d{2}|\d{3})$">
+	<action application="answer"/>
+	<action application="sleep" data="2000"/>
+	<action application="playback" data="ascii/$1.wav"/>
+	<action application="sleep" data="200"/>
+	<action application="playback" data="ascii/$2.wav"/>
+	<action application="playback" data="$${sounds_dir}/Error_Message.wav"/>
+	<action application="sleep" data="2000"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="speak something">
+      <condition field="destination_number" expression="^speakthis$">
+	<action application="answer"/>
+	<action application="sleep" data="2000"/>
+	<action application="speak" data="flite|awb|this is an T T S test"/>
+	<action application="sleep" data="200"/>
+	<action application="speak" data="flite|kal|which uses a f lite T T S engine"/>
+	<action application="sleep" data="200"/>
+	<action application="speak" data="flite|rms|and speaks a string of text"/>
+	<action application="sleep" data="200"/>
+	<action application="speak" data="flite|slt|to the user who called this extension"/>
+	<action application="sleep" data="2000"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="say something">
+      <condition field="destination_number" expression="^saythis$">
+	<action application="answer"/>
+	<action application="sleep" data="2000"/>
+	<!-- <action function="say" method="iterated" type="IP_ADDRESS" data="your server ip is"/> -->
+	<action application="sleep" data="200"/>
+ 	<action application="say" data="en IP_ADDRESS iterated ${local_ip_v4}"/>
+	<action application="sleep" data="2000"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="phrase something">
+      <condition field="destination_number" expression="^phrasethis$">
+	<action application="answer"/>
+	<action application="sleep" data="2000"/>
+ 	<action application="phrase" data="testphrase"/>
+	<action application="sleep" data="200"/>
+ 	<action application="playback" data="phrase:testphrase2"/>
+	<action application="sleep" data="2000"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="P-Asserted-Identity">
+      <condition field="destination_number" expression="pidtest">
+	<action application="answer"/>
+	<action application="set" data="sip_cid_type=pid"/>
+	<action application="set" data="privacy=yes"/>
+	<action application="privacy" data="full"/>
+	<action application="set" data="sip_h_Privacy=joshebosh"/>
+	<action application="set" data="origination_privacy=hide_name:hide_number:screen"/>
+	<action application="info"/>
+	<action application="echo"/>
+	<action application="bridge" data="{sip_cid_type=pid}"/>
+      </condition>
+    </extension>
+
+    <extension name="dp_chan_var_test">
+      <condition field="destination_number" expression="^1020$">
+	<action application="set" data="dp_chan_var_1=value_1"/>
+	<action application="export" data="dp_chan_var_2=value_2"/><!-- DEPRECATED -->
+	<!--<action application="set" data="dp_chan_var_2=value_2"/>-->
+	<action application="info"/>
+	<action application="set" data="bridge_pre_execute_bleg_app=info"/>
+        <action application="bridge" data="{local_var_clobber=false,dp_chan_var_3=value_3}[dp_chan_var_3=value3_override]user/1001"/>
+        <!-- <action application="bridge" data="{local_var_clobber=false,dp_chan_var_2=value_2,dp_chan_var_3=value_3}[dp_chan_var_3=value3_override]user/1001"/> -->
+      </condition>
+    </extension>
+
+    <extension name="bridge simultaneous blegs - ringall group">
+      <condition field="destination_number" expression="^1021$">
+	<action application="bridge" data="{ignore_early_media=true}[leg_timeout=20]${verto_contact(1001)},[leg_timeout=20]${verto_contact(1002)}"/>
+	</condition>
+      </extension>
+
+    <extension name="bridge sequential blegs - hunt/round-robin group">
+      <condition field="destination_number" expression="^1022$">
+	<action application="bridge" data="{ignore_early_media=true}[leg_timeout=20]${verto_contact(1001)}|[leg_timeout=20]${verto_contact(1002)}"/>
+	</condition>
+      </extension>
+
+    <extension name="bridge enterprise blegs">
+      <condition field="destination_number" expression="^1023$">
+	<action application="bridge" data="{ignore_early_media=true}[leg_timeout=20]${verto_contact(1001)}|[leg_timeout=20]${verto_contact(1002)}"/>
+	<action application="bridge" data="<ignore_early_media=true>{call_timeout=30}[leg_timeout=10]sofia/internal/staffA@ip.com,[leg_timeout=10]sofia/internal/staffB@ip.com:_:{call_timeout=60}[leg_timeout]sofia/internal/staffY@xz.com|[leg_timeout=]sofia/internal/staffZ@xz.com"/>
+      </condition>
+    </extension>
+
+    <extension name="capture_group_test">
+      <condition field="destination_number" expression="^22((\+)?(1)?(8(00|44|55|66|77|88))([2-9]\d{2})(\d{4}))">
+	<action application="log" data="notice -- 1 = [$1]"/>
+	<action application="log" data="notice -- 2 = [$2]"/>
+	<action application="log" data="notice -- 3 = [$3]"/>
+	<action application="log" data="notice -- 4 = [$4]"/>
+	<action application="log" data="notice -- 5 = [$5]"/>
+	<action application="log" data="notice -- 6 = [$6]"/>
+	<action application="log" data="notice -- 7 = [$7]"/>
+	<action application="log" data="notice reconstruction [$2$3$4$6$7] or [$1]"/>
+	<action application="answer"/>
+	<action application="echo"/>
+      </condition>
+    </extension>
+
+    <extension name="sales">
+      <condition field="destination_number" expression="sales|200">
+        <action application="set" data="hangup_after_bridge=true"/>
+	<action application="set" data="continue_on_fail=true"/>
+	<action application="set" data="originate_continue_on_timeout=true"/>
+	<action application="set" data="call_timeout=15"/>
+	<action application="bridge" data="${group_call(sales@${domain_name}+A)}"/>
+	<!-- <action application="transfer" data="sales XML default"/> -->
+	<action application="bridge" data="loopback/app=voicemail:default ${domain_name} 1005"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="play_and_get_digits example">
+      <condition field="destination_number" expression="^(1888)$">
+	<action application="answer"/>
+	<action application="play_and_get_digits" data="2 5 3 5000 # $${sounds_dir}/Answering_Machine.wav $${sounds_dir}/Error_Message.wav foobar \d+"/>
+	<!-- <action application="play_and_get_digits" data="2 5 3 70000 # ${say_string en.wav en current_date_time pronounced ${strepoch()}} $${sounds_dir}/Error_Message.wav foobar \d+"/> -->
+	<action application="transfer" data="${foobar} XML default"/>
+	<action application="hangup"/>
+      </condition>
+   </extension>
+
+    <extension name="notworking">
+      <condition field="destination_number" expression="^996$">
+        <action application="pre_answer"/>
+        <action application="playback" data="tone_stream://%(400,200,375,425);%(400,1000,400,450);%(400,1000,425,475);loops=2" />
+        <action application="set" data="api_result=${uuid_displace ${uuid} start tone_stream://%(2000,8000,440,480)}" />
+        <action application="sleep" data="15000"/>
+        <action application="hangup"/>
+      </condition>
+    </extension>
+
+   <extension name="working">
+     <condition field="destination_number" expression="^997$">
+       <action application="pre_answer"/>
+       <action application="set" data="api_result=${uuid_displace ${uuid} start /usr/local/freeswitch/sounds/joshebosh/Error_Message.wav}" />
+       <action application="playback" data="tone_stream://%(2000,4000,440,480);loops=2" />
+        <action application="sleep" data="15000"/>
+        <action application="hangup"/>
+     </condition>
+   </extension>
+
+    <extension name="local stream">
+      <condition field="destination_number" expression="^787|local_stream$">
+	<action application="playback" data="local_stream://joshebosh"/>
+      </condition>
+    </extension>
+
+    <extension name="fifo agent">
+      <condition field="destination_number" expression="^7770$">
+	<!-- <action application="set" data="hangup_after_bridge=false"/> -->
+	<!-- <action application="set" data="fifo_consumer_exit_key=*"/> -->
+	<!-- <action application="set" data="fifo_consumer_wrapup_key=#"/> -->
+	<!-- <action application="set" data="fifo_consumer_wrapup_sound=$${sounds_dir}/Error_Message.wav"/> -->
+	<!-- <action application="set" data="fifo_consumer_wrapup_time=10000"/> -->
+	<action application="fifo" data="myqueue out wait tone_stream://%(100,1000,800) local_stream://default"/>
+      </condition>
+    </extension>
+
+    <extension name="fifo customer">
+      <condition field="destination_number" expression="^(7771)$">
+	<action application="fifo" data="myqueue in tone_stream://%(100,1000,800) local_stream://default"/>
+      </condition>
+    </extension>
+
+    <extension name="test flac play">
+      <condition field="destination_number" expression="^(596)$">
+	<action application="playback" data="/usr/local/freeswitch/sounds/record.flac"/>
+      </condition>
+    </extension>
+
+    <extension name="test flac record">
+      <condition field="destination_number" expression="^(597)$">
+	<action application="set" data="media_bug_answer_req=true"/>
+	<action application="record_session" data="/usr/local/freeswitch/sounds/record.flac"/>
+	<action application="bridge" data="user/1000@${domain}"/>
+      </condition>
+    </extension>
+
+    <extension name="123_screen">
+      <condition field="destination_number" expression="^(3600)$">
+	<action application="conference" data="$1-${domain_name}@video-mcu-stereo"/>
+      </condition>
+    </extension>
+
+    <extension name="conf_bridger">
+      <condition field="destination_number" expression="^599$">
+	<action application="conference" data="bridge:3500-${domain_name}@passthrough:sofia/internal/3600@192.168.150.3:5080+flags{moderator|deaf|mute|join-vid-floor|endconf} inline" />
+      </condition>
+    </extension>
+
+    <extension name="cdquality_stereo_conferences">
+      <condition field="destination_number" expression="^599-screen$">
+	<action application="answer"/>
+	<action application="set" data="conference_member_flags=join-vid-floor"/>
+	<action application="conference" data="3500-${domain_name}@passthrough"/>
+      </condition>
+    </extension>
+
+
+    <extension name="unloop">
+      <condition field="${unroll_loops}" expression="^true$"/>
+      <condition field="${sip_looped_call}" expression="^true$">
+	<action application="deflect" data="${destination_number}"/>
+      </condition>
+    </extension>
+
+    <!-- Example of doing things based on time of day.
+
+	 year = 4 digit year. Example year="2009"
+	 yday = 1-36
+	 mon = 1-12
+	 mday = 1-31
+	 week = 1-52
+	 mweek= 1-6
+	 wday = 1-7
+	 hour = 0-23
+	 minute = 0-59
+	 minute-of-day = 1-1440
+
+	 Example:
+	 <condition minute-of-day="540-1080"> (9am to 6pm EVERY day)
+	 do something ...
+	 </condition>
+    -->
+    <extension name="tod_example" continue="true">
+      <condition wday="2-6" hour="9-18">
+	<action application="set" data="open=true"/>
+      </condition>
+    </extension>
+
+    <!-- Example of routing based on holidays
+
+	This example covers all US Federal holidays except for inauguration day.
+    -->
+
+    <extension name="holiday_example" continue="true">
+      <condition mday="1" mon="1">
+	<!-- new year's day -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition wday="2" mweek="3" mon="1">
+	<!-- martin luther king day is the 3rd monday in january -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition wday="2" mweek="3" mon="2">
+	<!-- president's day is the 3rd monday in february -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition wday="2" mon="5" mday="25-31">
+	<!-- memorial day is the last monday in may (the only monday between the 25th and the 31st) -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition mday="4" mon="7">
+	<!-- independence day -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition wday="2" mday="1-7" mon="9">
+	<!-- labor day is the 1st monday in september (the only monday between the 1st and the 7th) -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition wday="2" mweek="2" mon="10">
+	<!-- columbus day is the 2nd monday in october -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition mday="11" mon="11">
+	<!-- veteran's day -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition wday="5-6" mweek="4" mon="11">
+	<!-- thanksgiving is the 4th thursday in november and usually there's an extension for black friday -->
+	<action application="set" data="open=false"/>
+      </condition>
+      <condition mday="25" mon="12">
+	<!-- Christmas -->
+	<action application="set" data="open=false"/>
+      </condition>
+    </extension>
+
+
+    <extension name="global-intercept">
+      <condition field="destination_number" expression="^886$">
+	<action application="answer"/>
+	<action application="intercept" data="${hash(select/${domain_name}-last_dial_ext/global)}"/>
+	<action application="sleep" data="2000"/>
+      </condition>
+    </extension>
+
+    <extension name="group-intercept">
+      <condition field="destination_number" expression="^\*8$">
+	<action application="answer"/>
+	<!-- <action application="intercept" data="${hash(select/${domain_name}-last_dial_ext/${callgroup})}"/> -->
+	<action application="intercept" data="${hash(select/${domain_name}-last_dial_ext/${callgroup})}"/>
+	<action application="sleep" data="2000"/>
+      </condition>
+    </extension>
+
+    <extension name="intercept-ext">
+      <condition field="destination_number" expression="^\*\*(\d+)$">
+	<action application="answer"/>
+	<action application="intercept" data="${hash(select/${domain_name}-last_dial_ext/$1)}"/>
+	<action application="sleep" data="2000"/>
+      </condition>
+    </extension>
+
+    <extension name="redial">
+      <condition field="destination_number" expression="^(redial|870)$">
+	<action application="transfer" data="${hash(select/${domain_name}-last_dial/${caller_id_number})}"/>
+      </condition>
+    </extension>
+
+    <extension name="global" continue="true">
+      <condition field="${call_debug}" expression="^true$" break="never">
+	<action application="info"/>
+      </condition>
+
+      <condition field="${default_password}" expression="^1234$" break="never">
+	<action application="log" data="CRIT WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING "/>
+	<action application="log" data="CRIT Open $${conf_dir}/vars.xml and change the default_password."/>
+	<action application="log" data="CRIT Once changed type 'reloadxml' at the console."/>
+	<action application="log" data="CRIT WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING "/>
+	<action application="sleep" data="10000"/>
+      </condition>
+      <!--
+	  This is an example of how to auto detect if telephone-event is missing and activate inband detection
+      -->
+      <!--
+      <condition field="${switch_r_sdp}" expression="a=rtpmap:(\d+)\stelephone-event/8000" break="never">
+	<action application="set" data="rtp_payload_number=$1"/>
+	<anti-action application="start_dtmf"/>
+      </condition>
+      -->
+      <condition field="${rtp_has_crypto}" expression="^($${rtp_sdes_suites})$" break="never">
+	<action application="set" data="rtp_secure_media=true"/>
+	<!-- Offer SRTP on outbound legs if we have it on inbound. -->
+	<action application="export" data="rtp_secure_media=true"/>
+      </condition>
+
+      <condition field="${rtp_has_crypto}" expression="^((sip:dtls:)?$${rtp_sdes_suites})$" break="never">
+	<action application="set" data="rtp_secure_media=true"/>
+	<!-- Offer SRTP on outbound legs if we have it on inbound. -->
+	<action application="export" data="rtp_secure_media=true"/>
+	<action application="log" data="INFO +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"/>
+	<action application="log" data="INFO ${uuid} rtp_secure_media: ${rtp_secure_media}"/>
+	<action application="log" data="INFO ${uuid} srtp_remote_audio_crypto_type: ${srtp_remote_audio_crypto_type}"/>
+	<action application="log" data="INFO ${uuid} srtp_remote_video_crypto_type: ${srtp_remote_video_crypto_type}"/>
+	<action application="log" data="INFO +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"/>
+	<anti-action application="export" data="rtp_secure_media=false"/>
+      </condition>
+
+      <!--
+	 Since we have inbound-late-negotation on by default now the
+	 above behavior isn't the same so you have to do one extra step.
+	-->
+      <condition field="${endpoint_disposition}" expression="^(DELAYED NEGOTIATION)" break="never"/>
+      <condition field="${switch_r_sdp}" expression="(AES_CM_128_HMAC_SHA1_32|AES_CM_128_HMAC_SHA1_80)" break="never">
+	<action application="set" data="rtp_secure_media=true"/>
+	<!-- Offer SRTP on outbound legs if we have it on inbound. -->
+	<action application="export" data="rtp_secure_media=true"/>
+      </condition>
+
+      <condition>
+	<action application="hash" data="insert/${domain_name}-spymap/${user_name}/${uuid}"/>
+	<action application="hash" data="insert/${domain_name}-last_dial/${caller_id_number}/${destination_number}"/>
+	<action application="hash" data="insert/${domain_name}-last_dial/global/${uuid}"/>
+	<action application="export" data="RFC2822_DATE=${strftime(%a, %d %b %Y %T %z)}"/>
+      </condition>
+    </extension>
+
+
+    <!-- If sip_req_host is not a local domain then this has to be an external sip uri -->
+    <!--
+    <extension name="external_sip_uri" continue="true">
+      <condition field="source" expression="mod_sofia"/>
+      <condition field="${outside_call}" expression="^$"/>
+      <condition field="${domain_exists(${sip_req_host})}" expression="true">
+	<anti-action application="bridge" data="sofia/${use_profile}/${sip_to_uri}"/>
+      </condition>
+    </extension>
+    -->
+    <!--
+	Snom button demo, call 9000 to make button 2 mapped to transfer the current call to a conference
+    -->
+
+    <extension name="snom-demo-2">
+      <condition field="destination_number" expression="^9001$">
+	<action application="eval" data="${snom_bind_key(2 off DND ${sip_from_user} ${sip_from_host} ${sofia_profile_name} message notused)}"/>
+	<action application="transfer" data="3000"/>
+      </condition>
+    </extension>
+
+    <extension name="snom-demo-1">
+      <condition field="destination_number" expression="^9000$">
+	<!--<key> <light> <label> <user> <host> <profile> <action_name> <action>-->
+	<action application="eval" data="${snom_bind_key(2 on DND ${sip_from_user} ${sip_from_host} ${sofia_profile_name} message api+uuid_transfer ${uuid} 9001)}"/>
+	<action application="playback" data="$${hold_music}"/>
+      </condition>
+    </extension>
+
+    <extension name="eavesdrop">
+      <condition field="destination_number" expression="^88(\d{4})$|^\*0(.*)$">
+	<action application="answer"/>
+	<action application="eavesdrop" data="${hash(select/${domain_name}-spymap/$1$2)}"/>
+      </condition>
+    </extension>
+
+    <extension name="eavesdrop">
+      <condition field="destination_number" expression="^779$">
+	<action application="answer"/>
+	<action application="set" data="eavesdrop_indicate_failed=tone_stream://%(500, 0, 320)"/>
+	<action application="set" data="eavesdrop_indicate_new=tone_stream://%(500, 0, 620)"/>
+	<action application="set" data="eavesdrop_indicate_idle=tone_stream://%(250, 0, 920)"/>
+	<action application="eavesdrop" data="all"/>
+      </condition>
+    </extension>
+
+    <extension name="call_return">
+      <condition field="destination_number" expression="^\*69$|^869$|^lcr$">
+	<action application="transfer" data="${hash(select/${domain_name}-call_return/${caller_id_number})}"/>
+      </condition>
+    </extension>
+
+    <extension name="del-group">
+      <condition field="destination_number" expression="^80(\d{2})$">
+	<action application="answer"/>
+	<action application="group" data="delete:$1@${domain_name}:${sofia_contact(${sip_from_user}@${domain_name})}"/>
+	<action application="gentones" data="%(1000, 0, 320)"/>
+      </condition>
+    </extension>
+
+    <extension name="add-group">
+      <condition field="destination_number" expression="^81(\d{2})$">
+	<action application="answer"/>
+	<action application="group" data="insert:$1@${domain_name}:${sofia_contact(${sip_from_user}@${domain_name})}"/>
+	<action application="gentones" data="%(1000, 0, 640)"/>
+      </condition>
+    </extension>
+
+    <extension name="call-group-simo">
+      <condition field="destination_number" expression="^82(\d{2})$">
+	<action application="bridge" data="{leg_timeout=15,ignore_early_media=true}${group(call:$1@${domain_name})}"/>
+      </condition>
+    </extension>
+
+    <extension name="call-group-order">
+      <condition field="destination_number" expression="^83(\d{2})$">
+	<action application="bridge" data="{leg_timeout=15,ignore_early_media=true}${group(call:$1@${domain_name}:order)}"/>
+      </condition>
+    </extension>
+
+    <extension name="extension-intercom">
+      <condition field="destination_number" expression="^8(10[01][0-9])$">
+	<action application="set" data="dialed_extension=$1"/>
+	<action application="export" data="sip_auto_answer=true"/>
+	<action application="bridge" data="user/${dialed_extension}@${domain_name}"/>
+    </condition>
+    </extension>
+
+    <!--
+	 dial the extension (1000-1019) for 30 seconds and go to voicemail if the
+	 call fails (continue_on_fail=true), otherwise hang up after a successful
+	 bridge (hangup_after_bridge=true)
+    -->
+
+    <extension name="ivt-exit-test">
+      <condition field="destination_number" expression="^(559)$">
+        <action application="lua" data="test-ivr.lua"/>
+      </condition>
+    </extension>
+
+    <extension name="Local_Extension">
+      <condition field="destination_number" expression="^(10[01][0-9])$">
+	<action application="export" data="dialed_extension=$1"/>
+	<!-- bind_meta_app can have these args <key> [a|b|ab] [a|b|o|s] <app> -->
+	<action application="bind_meta_app" data="1 b s execute_extension::dx XML features"/>
+	<action application="bind_meta_app" data="2 b s record_session::$${recordings_dir}/${caller_id_number}.${strftime(%Y-%m-%d-%H-%M-%S)}.wav"/>
+	<action application="bind_meta_app" data="3 b s execute_extension::cf XML features"/>
+	<action application="bind_meta_app" data="4 b s execute_extension::att_xfer XML features"/>
+	<action application="set" data="ringback=${us-ring}"/>
+	<action application="set" data="transfer_ringback=$${hold_music}"/>
+	<action application="set" data="call_timeout=30"/>
+	<!-- <action application="set" data="sip_exclude_contact=${network_addr}"/> -->
+	<action application="set" data="hangup_after_bridge=true"/>
+	<!--<action application="set" data="continue_on_fail=NORMAL_TEMPORARY_FAILURE,USER_BUSY,NO_ANSWER,TIMEOUT,NO_ROUTE_DESTINATION"/> -->
+	<action application="set" data="continue_on_fail=true"/>
+	<action application="hash" data="insert/${domain_name}-call_return/${dialed_extension}/${caller_id_number}"/>
+	<action application="hash" data="insert/${domain_name}-last_dial_ext/${dialed_extension}/${uuid}"/>
+	<action application="set" data="called_party_callgroup=${user_data(${dialed_extension}@${domain_name} var callgroup)}"/>
+	<action application="hash" data="insert/${domain_name}-last_dial_ext/${called_party_callgroup}/${uuid}"/>
+	<action application="hash" data="insert/${domain_name}-last_dial_ext/global/${uuid}"/>
+	<!--<action application="export" data="nolocal:rtp_secure_media=${user_data(${dialed_extension}@${domain_name} var rtp_secure_media)}"/>-->
+	<action application="hash" data="insert/${domain_name}-last_dial/${called_party_callgroup}/${uuid}"/>
+	<action application="bridge" data="user/${dialed_extension}@${domain_name}"/>
+	<action application="answer"/>
+	<action application="sleep" data="1000"/>
+	<action application="bridge" data="loopback/app=voicemail:default ${domain_name} ${dialed_extension}"/>
+      </condition>
+    </extension>
+
+
+    <!-- <extension name="Local_Extension"> -->
+      <!-- <condition field="destination_number" expression="^(10[01][0-9])$"> -->
+	<!-- <action application="verbose_events" data="true"/> -->
+	<!-- <action application="set" data="hold_music=$${jsounds}Tomtoms.wav"/> -->
+	<!-- <action application="set" data="ringback=$${bong-ring}"/> -->
+	<!-- <action application="set" data="instant_ringback=true"/> -->
+
+
+	<!-- <action application="set" data="execute_on_originate=playback tone_stream://v=0;%(500,500,500);loops=60"/> -->
+	<!-- <action application="set" data="execute_on_pre_answer=playback tone_stream://v=0;%(500,500,1000);loops=60"/> -->
+	<!-- <action application="set" data="execute_on_media=playback tone_stream://v=0;%(500,500,1500);loops=60"/> -->
+	<!-- <action application="set" data="execute_on_ring=playback tone_stream://v=0;%(500,500,2000);loops=60"/> -->
+	<!-- <action application="set" data="execute_on_answer=playback tone_stream://v=0;%(500,500,2500);loops=60"/> -->
+
+
+
+	<!-- <action application="set" data="ringback=tone_stream://v=0;%(500,500,1000);loops=60"/>  -->
+	<!-- <action application="ring_ready"/> -->
+	<!-- <action application="sleep" data="60000"/> -->
+	<!-- <action application="pre_answer"/> -->
+	<!-- <action application="playback" data="${ringback}"/> -->
+
+	<!-- <action application="set" data="ringback=tone_stream://v=0;%(500,500,1500);loops=60"/> -->
+	<!-- <action application="ring_ready"/> -->
+	<!-- <action application="sleep" data="60000"/> -->
+	<!-- <action application="pre_answer"/> -->
+	<!-- <action application="playback" data="${ringback}"/> -->
+
+	<!-- <action application="set" data="ringback=tone_stream://v=0;%(500,500,2000);loops=60"/> -->
+	<!-- <action application="ring_ready"/> -->
+	<!-- <action application="sleep" data="60000"/> -->
+	<!-- <action application="pre_answer"/> -->
+	<!-- <action application="playback" data="${ringback}"/> -->
+
+	<!-- <action application="set" data="ringback=tone_stream://v=0;%(500,500,2500);loops=60"/> -->
+	<!-- <action application="ring_ready"/> -->
+	<!-- <action application="sleep" data="60000"/> -->
+	<!-- <action application="pre_answer"/> -->
+	<!-- <action application="playback" data="${ringback}"/> -->
+
+
+
+	<!-- <action application="ring_ready"/> -->
+	<!-- <action application="sleep" data="60000"/> -->
+	<!-- <action application="playback" data="tone_stream://v=0;%(200,50,500,1500,800);loops=60"/> -->
+
+
+	<!-- <action application="pre_answer"/> -->
+	<!-- <action application="sleep" data="60000"/> -->
+	<!-- <action application="playback" data="tone_stream://v=0;%(250,250,500,1500,800);loops=120"/> -->
+
+
+	<!-- <action application="answer"/> -->
+	<!-- <action application="sleep" data="60000"/> -->
+	<!-- <action application="bridge" data="user/${dialed_extension}@${domain_name}"/>	 -->
+
+
+	<!-- <action application="export" data="rtp_secure_media=true"/> -->
+
+	<!-- <action application="lua" data="test.lua"/> -->
+	<!-- <action application="novideo"/> -->
+	<!-- <action application="set" data="video_width=320"/> -->
+	<!-- <action application="set" data="video_height=240"/> -->
+	<!-- <action application="export" data="dialed_extension=$1" inline="true"/> -->
+
+ 	<!-- bind_meta_app can have these args <key> [a|b|ab] [a|b|o|s] <app> -->
+	<!-- <action application="bind_meta_app" data="1 b s execute_extension::dx XML features"/> -->
+	<!-- <action application="bind_meta_app" data="2 b s record_session::$${recordings_dir}/${caller_id_number}.${strftime(%Y-%m-%d-%H-%M-%S)}.wav"/> -->
+	<!-- <action application="bind_meta_app" data="3 b s execute_extension::cf XML features"/> -->
+	<!-- <action application="bind_meta_app" data="4 b s execute_extension::att_xfer XML features"/> -->
+	<!-- <action application="bind_meta_app" data="5 ab s playback::${sounds_dir}/Answering_Machine.wav"/> -->
+
+	<!-- <action application="set" data="call_timeout=30"/> -->
+	<!-- <action application="set" data="sip_exclude_contact=${network_addr}"/> -->
+	<!-- <action application="set" data="hangup_after_bridge=true"/> -->
+	<!-- <action application="set" data="continue_on_fail=NORMAL_TEMPORARY_FAILURE,USER_BUSY,NO_ANSWER,TIMEOUT,NO_ROUTE_DESTINATION"/> -->
+	<!-- <action application="set" data="continue_on_fail=true"/> -->
+	<!-- <action application="hash" data="insert/${domain_name}-call_return/${dialed_extension}/${caller_id_number}"/> -->
+	<!-- <action application="hash" data="insert/${domain_name}-last_dial_ext/${dialed_extension}/${uuid}"/> -->
+        <!-- <action application="set" data="called_party_callgroup=${user_data(${dialed_extension}@${domain_name} var callgroup)}"/> -->
+	<!-- <action application="hash" data="insert/${domain_name}-last_dial_ext/${called_party_callgroup}/${uuid}"/> -->
+	<!-- <action application="hash" data="insert/${domain_name}-last_dial_ext/global/${uuid}"/> -->
+	<!-- <action application="hash" data="insert/${domain_name}-last_dial/${called_party_callgroup}/${uuid}"/> -->
+
+	<!-- <action application="set" data="media_bug_answer_req=true"/> -->
+	<!-- <action application="set" data="record_concat_video=true"/> -->
+	<!-- <action application="set" data="record_filename=/var/www/html/fs/${strftime(%Y-%m-%d-%H-%M-%S)}_${uuid}" inline="true"/> -->
+	<!-- <action application="set" data="RECORD_MIN_SEC=2"/> -->
+	<!-- <action application="set" data="RECORD_STEREO=true"/> -->
+	<!-- <action application="set" data="record_read_only=true"/> -->
+	<!-- <action application="record_session" data="${record_filename}.mp4"/> -->
+        <!-- <action application="set" data="RECORD_APPEND=true"/> -->
+	<!-- <action application="set" data="RECORD_TOGGLE_ON_REPEAT=true"/> -->
+	<!-- <action application="set" data="record_sample_rate=16000"/> -->
+	<!-- <action application="bind_meta_app" data="7 ab s record_session::${record_filename}.mp4"/> -->
+	<!-- <action application="set" data="execute_on_answer=record_session {vencspd=normal}${record_filename}.mp4"/> -->
+	<!-- <action application="set" data="execute_on_answer=record_session ${record_filename}.wav"/> -->
+
+	<!-- <action application="set_global" data="aleg=${uuid}"/> -->
+	<!-- <action application="set_global" data="bleg=${create_uuid()}" inline="true"/> -->
+
+	<!-- <action application="set" data="rtp_pass_codecs_on_stream_change=true"/> -->
+
+	<!-- <action application="hash" data="insert/call_uuid/aleg/${uuid}"/> -->
+	<!-- <action application="hash" data="insert/call_uuid/bleg/${create_uuid()}"/> -->
+
+	<!-- <action application="set" data="api_on_answer=uuid_displace ${uuid} start tone_stream://v=0;%(100,1500,800);loops=-1 0 rm"/> -->
+
+        <!-- <action application="set" data="my_outbound_uuid=${create_uuid()}" inline="true"/> -->
+	<!-- <action application="set" data="api_on_answer=uuid_displace ${uuid} start $${sounds_dir}/Attention.mp3 0 mux"/> -->
+	<!-- <action application="bridge" data="{origination_uuid=${my_outbound_uuid},api_on_answer='uuid_displace ${my_outbound_uuid} start $${sounds_dir}/Attention.mp3 0 mux'}sofia/gateway/flowroute/"/> -->
+
+        <!-- <action application="bridge" data="{absolute_codec_string=PCMU,media_bug_answer_req=true,origination_uuid=${bleg_uuid},RECORD_STEREO=true,execute_on_media_1=record_session ${record_filename},execute_on_media_2=log CRIT LOGGED HERE,api_on_answer='uuid_displace ${bleg_uuid} start tone_stream://v=0;%(100,1500,800);loops=-1 0 mux'}sofia/gateway/flowroute/18005551212"/> -->
+
+        <!-- <action application="bridge" data="{bridge_early_media=true,absolute_codec_string=PCMU,media_bug_answer_req=true,origination_uuid=${bleg_uuid},RECORD_STEREO=true,api_on_media=uuid_record ${bleg_uuid} start ${record_filename},execute_on_media_2=log CRIT LOGGED HERE,api_on_answer='uuid_displace ${bleg_uuid} start tone_stream://v=0;%(100,1500,800);loops=-1 0 mux'}sofia/gateway/flowroute/18005551212"/> -->
+
+        <!-- <action application="bridge" data="{origination_uuid=${bleg_uuid},api_on_answer='uuid_displace ${bleg_uuid} start tone_stream://v=0;%(100,2000,800);loops=-1 0 mux'}sofia/gateway/flowroute/18005551212"/> -->
+
+
+	<!-- <action application="set" data="amd_execute_on_machine=transfer machine_found XML default"/> -->
+	<!-- <action application="set" data="execute_on_answer=playback ${sounds_dir}/Answering_Machine.wav"/> -->
+	<!-- <action application="set" data="execute_on_answer=voice_start"/> -->
+	<!-- <action application="export" data="api_on_answer=uuid_broadcast joshebosh ${sounds_dir}/Answering_Machine.wav both"/> -->
+	<!-- <action application="voice_start"/> -->
+
+        <!-- <action application="nibblebill" data="flush"/> -->
+
+	<!-- <action application="say" data="en name_spelled iterated joshua"/> -->
+	<!-- <action application="speak" data="watson_ws|en-US_LisaVoice|joshua is providing watson examples"/> -->
+	<!-- <action application="detect_speech" data="watson default default deault"/> -->
+	<!-- <action application="playback" data="silence_stream://10000"/> -->
+
+	<!-- <action application="lua" data="test.lua"/> -->
+
+	<!-- <action application="bind_digit_action" data="myrealm,555,exec:playback,${sounds_dir}/Error_Message.wav"/> -->
+	<!-- <action application="bind_digit_action" data="myrealm,555,exec:playback,${sounds_dir}/Attention.wav"/> -->
+	<!-- <action application="digit_action_set_realm" data="myrealm"/> -->
+
+        <!-- <action application="bridge" data="{origination_uuid=${bleg}}user/${dialed_extension}@${domain_name}"/> -->
+
+	<!-- <action application="set"><![CDATA[sip_h_P-Charge-Info=<sip_h_X-MyCustomVarA=MyCustomValue>]]></action> -->
+
+	<!-- <action application="set" data="sip_cid_type=pid"/> -->
+	<!-- <action application="set" data="origination_caller_id_name=five"/> -->
+	<!-- <action application="set" data="origination_caller_id_number=555"/> -->
+	<!-- <action application="set" data="origination_privacy=hide_name:hide_number:screen"/> -->
+
+	<!-- <action application="info"/> -->
+	<!-- <action application="set" data="bridge_pre_execute_bleg_app=info"/> -->
+
+	<!-- <action application="bridge" data="{sip_cid_type=pid,origination_caller_id_number=777,origination_caller_id_name=seven,origination_privacy=screen+hide_name}user/${dialed_extension}@${domain_name}"/> -->
+
+	<!-- <action application="bridge" data="{RECORD_MIN_SEC=2,record_read_only=true,execute_on_answer=record_session:${record_filename}.mp4}user/${dialed_extension}@${domain_name}"/> -->
+
+	<!-- <action application="set" data="sip_h_X-JOSHEBOSH=joshebosh.com"/> -->
+	<!-- <action application="bridge" data="{verto_h_testvar=testval}user/${dialed_extension}@${domain_name}"/>	 -->
+	<!-- <action application="sleep" data="2000"/> -->
+	<!-- <action application="eval" data="${bg_system(sox ${record_filename}.wav ${record_filename}_ALEG.wav remix 1;sox ${record_filename}.wav ${record_filename}_BLEG.wav remix 2)}"/> -->
+
+	<!-- <action application="hangup"/> -->
+ 	<!-- <action application="bridge" data="loopback/app=voicemail:default ${domain_name} ${dialed_extension}"/> -->
+      <!-- </condition>  -->
+    <!-- </extension> -->
+
+<!--
+    <extension name="bridge_test">
+      <condition field="destination_number" expression="^(1020)$">
+	<action application="set" data="continue_on_fail=true"/>
+	<action application="set" data="call_timeout=10"/>
+	<action application="set" data="hangup_after_bridge=true"/>
+	<action application="bridge" data="user/1002@$${domain}"/>
+	<action application="bridge" data="user/1003@$${domain}"/>
+      </condition>
+    </extension>
+
+
+    <extension name="stress_test">
+      <condition field="destination_number" expression="^(1020)$">
+	<action application="set" data="continue_on_fail=true"/>
+	<action application="set" data="call_timeout=10"/>
+	<action application="set" data="hangup_after_bridge=true"/>
+        <action application="stress" data="read"/>
+	<action application="bridge" data="user/1002@$${domain}"/>
+      </condition>
+    </extension>
+-->
+
+    <extension name="Local_Extension_Skinny">
+      <condition field="destination_number" expression="^(11[01][0-9])|skinny$">
+	<action application="set" data="dialed_extension=$1"/>
+	<action application="export" data="dialed_extension=$1"/>
+	<action application="set" data="call_timeout=30"/>
+	<action application="set" data="hangup_after_bridge=true"/>
+	<action application="set" data="continue_on_fail=true"/>
+        <action application="bridge" data="skinny/internal/${destination_number}"/>
+	<action application="answer"/>
+	<action application="sleep" data="1000"/>
+	<action application="bridge" data="loopback/app=voicemail:default ${domain_name} ${dialed_extension}"/>
+      </condition>
+    </extension>
+
+    <extension name="group_dial_sales">
+      <condition field="destination_number" expression="^2000$">
+	<action application="bridge" data="${group_call(sales@${domain_name})}"/>
+      </condition>
+    </extension>
+
+    <extension name="group_dial_support">
+      <condition field="destination_number" expression="^2001$">
+	<action application="bridge" data="group/support@${domain_name}"/>
+      </condition>
+    </extension>
+
+    <extension name="group_dial_billing">
+      <condition field="destination_number" expression="^2002$">
+	<action application="bridge" data="group/billing@${domain_name}"/>
+      </condition>
+    </extension>
+
+    <!-- voicemail operator extension -->
+    <extension name="operator">
+      <condition field="destination_number" expression="^(operator|0)$">
+	<action application="set" data="transfer_ringback=$${hold_music}"/>
+	<action application="transfer" data="1000 XML features"/>
+      </condition>
+    </extension>
+
+    <!-- voicemail main extension -->
+    <extension name="vmain">
+      <condition field="destination_number" expression="^vmain$|^4000$|^\*98$">
+	<action application="answer"/>
+	<action application="sleep" data="1000"/>
+	<action application="voicemail" data="check default ${domain_name}"/>
+      </condition>
+    </extension>
+
+    <!--
+	 This extension is used by mod_portaudio so you can pa call sip:someone@example.com
+	 mod_portaudio will pass the entire string to the dialplan for routing.
+    -->
+    <extension name="sip_uri">
+      <condition field="destination_number" expression="^sip:(.*)$">
+	<action application="bridge" data="sofia/${use_profile}/$1"/>
+      </condition>
+    </extension>
+
+    <!--
+	start a dynamic conference with the settings of the "default" conference profile in conference.conf.xml
+    -->
+    <extension name="nb_conferences">
+      <condition field="destination_number" expression="^(30\d{2})$">
+	<action application="answer"/>
+	<action application="conference" data="$1-${domain_name}@default"/>
+      </condition>
+    </extension>
+
+    <extension name="wb_conferences">
+      <condition field="destination_number" expression="^(31\d{2})$">
+	<action application="answer"/>
+	<action application="conference" data="$1-${domain_name}@wideband"/>
+      </condition>
+    </extension>
+
+    <extension name="uwb_conferences">
+      <condition field="destination_number" expression="^(32\d{2})$">
+	<action application="answer"/>
+	<action application="conference" data="$1-${domain_name}@ultrawideband"/>
+      </condition>
+    </extension>
+    <!-- MONO 48kHz conferences -->
+    <extension name="cdquality_conferences">
+      <condition field="destination_number" expression="^(33\d{2})$">
+	<action application="answer"/>
+	<action application="conference" data="$1-${domain_name}@cdquality"/>
+      </condition>
+    </extension>
+
+    <!-- STEREO 48kHz conferences / Video MCU -->
+    <extension name="cdquality_stereo_conferences">
+      <condition field="destination_number" expression="^(35\d{2}).*?-screen$">
+	<action application="answer"/>
+	<action application="send_display" data="FreeSWITCH Conference|$1"/>
+	<action application="set" data="conference_member_flags=join-vid-floor"/>
+	<action application="conference" data="$1-${domain_name}@video-mcu-stereo"/>
+      </condition>
+    </extension>
+
+    <!-- STEREO 48kHz conferences / Video MCU -->
+    <!-- <extension name="cdquality_stereo_conferences"> -->
+      <!-- <condition field="destination_number" expression="^(35\d{2}).*?-screen$"> -->
+	<!-- <action application="answer"/> -->
+	<!-- <action application="send_display" data="FreeSWITCH Conference|$1"/> -->
+	<!-- <action application="set" data="conference_member_flags=join-vid-floor"/> -->
+	<!-- <action application="set" data="video_mirror_input=true"/> -->
+	<!-- <action application="set" data="video_banner_text=${uuid}"/> -->
+	<!-- <action application="set_global" data="conf_screen_$1=${uuid}"/> -->
+	<!-- <action application="log" data="CRIT this is conference screen"/> -->
+	<!-- <action application="info"/> -->
+	<!-- <action application="conference" data="$1-${domain_name}@video-mcu-stereo"/> -->
+      <!-- </condition> -->
+    <!-- </extension> -->
+
+    <extension name="conference-canvases" continue="true">
+      <condition field="destination_number" expression="(35\d{2})-canvas-(\d+)">
+	<action application="push" data="conference_member_flags=second-screen"/>
+	<action application="set" data="video_initial_watching_canvas=$2"/>
+	<action application="set" data="video_banner_text=${uuid}"/>
+	<action application="log" data="CRIT this is conference canvas"/>
+      <action application="info"/>
+	<action application="transfer" data="$1"/>
+      </condition>
+    </extension>
+
+    <extension name="video_mcu_stereo_conference">
+      <condition field="destination_number" expression="^(35\d{2})$">
+	<action application="answer"/>
+	<action application="conference" data="$1-${domain_name}@video-mcu-stereo"/>
+      </condition>
+    </extension>
+
+    <!-- <extension name="cdquality_conferences"> -->
+      <!-- <condition field="destination_number" expression="^(35\d{2})$"> -->
+	<!-- <action application="answer"/> -->
+	<!-- <action application="set" data="rtp_timeout_sec=10"/> -->
+	<!-- <action application="playback" data="silence_stream://2000"/> -->
+	<!-- <action application="set" data="conference_enter_sound=silence_stream://10"/> -->
+	<!-- <action application="set" data="conference_exit_sound=silence_stream://10"/> -->
+	<!-- <action application="set" data="conference_exit_sound=$${sounds_dir}/Attention.wav"/> -->
+	<!-- <action application="set" data="conference_enter_sound=$${sounds_dir}/Attention.wav"/> -->
+	<!-- <action application="set" data="conference_enter_sound=tone_stream://%(200,0,500,600,700)"/> -->
+	<!-- <action application="set" data="conference_exit_sound=tone_stream://%(500,0,300,200,100,50,25"/> -->
+	<!-- <action application="set" data="video_banner_text=${uuid}"/> -->
+	<!-- <action application="set" data="video_logo_path={position=center-bot}$${images_dir}/joshebosh_logo.png"/> -->
+	<!-- <action application="set" data="conference_flags=video-required-for-canvas,video-muxing-peronsal-canvas"/> -->
+	<!-- <action application="set" data="conference_flags=video-required-for-canvas,video-mute-exit-canvas"/> -->
+	<!-- <action application="set" data="conference_member_flags=vmute"/> -->
+        <!-- <action application="conference_set_auto_outcall" data="user/1000@$${domain}"/> -->
+	<!-- <action application="set" data="conference_auto_outcall_skip_member_beep=true"/> -->
+	<!-- <action application="conference_set_auto_outcall" data="sofia/external/28308479*18005551212@us-east-va.sip.flowroute.com;transport=tcp"/> -->
+	<!-- <action application="conference_set_auto_outcall" data="{conference_member_flags='vmute,ghost,second-screen,no-positional,mute,deaf,nomoh'}${verto_contact(1007)"/> -->
+	<!-- <action application="set" data="jb_av_sync_msec=disabled"/> -->
+	<!-- <action application="set" data="conference_auto_record=/var/www/html/fs/conference_participant_${uuid}.mp4"/> -->
+	<!-- <action application="set" data="video_mute_png=$${images_dir}/video_mute_png.png"/> -->
+	<!-- <action application="set" data="video_avatar_png=$${images_dir}/video_avatar_png.png"/> -->
+	<!-- <action application="set" data="video_no_video_avatar_png=$${images_dir}/video_no_video_avatar_png.png"/> -->
+
+	<!-- <action application="set" data="hangup_after_conference=false"/> -->
+
+	<!-- <action application="set" data="conference_utils_auto_outcall_flags=endconf|moderator"/> -->
+	<!-- <action application="set" data="conference_auto_outcall_prefix={hangup_after_conference=false}"/> -->
+	<!-- <action application="conference_set_auto_outcall" data="${verto_contact(1006)"/> -->
+
+	<!-- <action application="set" data="core_video_blank_image=$${images_dir}/core_video_blank_image.png"/> -->
+	<!-- <action application="conference" data="$1-${domain_name}@video-mcu-stereo+flags{enconf}"/> -->
+	<!-- <action application="conference" data="$1-${domain_name}@video-mcu-stereo"/> -->
+
+	<!-- <action application="set" data="echo_encode_video=true"/> -->
+	<!-- <action application="echo"/> -->
+
+      <!-- </condition> -->
+      <!-- </extension> -->
+
+      <extension name="conf mod">
+	<condition field="destination_number" expression="^6070-moderator$">
+	  <action application="answer"/>
+	  <action application="set" data="conference_member_flags=moderator"/>
+	  <action application="conference" data="$1-${domain_name}@video-mcu-stereo"/>
+	</condition>
+      </extension>
+
+    <!-- <extension name="conference administrator"> -->
+      <!-- <condition field="destination_number" expression="^(35\d{2})-admin$"> -->
+	<!-- <action application="set" data="conference_enforce_security=false"/> -->
+	<!-- <action application="bind_digit_action" data="local,*3,exec:log,CRIT YOU ARE HERE,both"/> -->
+	<!-- <action application="digit_action_set_realm" data="local"/> -->
+	<!-- <action application="record_session" data="{modname=mod_av}rtmp://192.168.150.3/live/joshebosh"/> -->
+	<!-- <action application="set" data="conference_member_flags=moderator,endconf"/> -->
+	<!-- <action application="bind_digit_action" data="adminrealm,*9*,exec:execute_extension,$1-add-someone XML default,aleg,aleg"/> -->
+	<!-- <action application="hash" data="insert/my-agent-realm/my-agent-key/${uuid}"/> -->
+	<!-- <action application="conference" data="$1-${domain_name}@video-mcu-stereo"/> -->
+      <!-- </condition> -->
+    <!-- </extension> -->
+
+    <extension name="conf admin add person">
+      <condition field="destination_number" expression="(35\d{2})-add-someone">
+	<action application="read" data="0 10 misc/sorry.wav DIALED 10000 #"/>
+	<action application="eval" data="${originate user/${DIALED} conference:$1-192.168.150.3 inline}"/>
+      </condition>
+    </extension>
+
+<!--
+    <extension name="conference administrator">
+      <condition field="destination_number" expression="^(35\d{2})-admin$">
+	<action application="answer"/>
+	<action application="set" data="video_banner_text=${uuid}"/>
+	<action application="eval" data="${conference $1-${domain_name} unlock}"/>
+	<action application="conference_set_auto_outcall" data="loopback/relocker"/>
+	<action application="set" data="conference_auto_outcall_caller_id_number=$1"/>
+	<action application="set" data="conference_number=$1"/>
+	<action application="set" data="conference_member_flags=moderator"/>
+	<action application="bind_digit_action" data="moderator,*1,exec:execute_extension,ASK_FOR_NUMBER__$1 XML default"/>
+	<action application="digit_action_set_realm" data="moderator"/>
+	<action application="conference" data="$1-${domain_name}@video-mcu-stereo"/>
+      </condition>
+    </extension>
+
+    <extension name="relocker">
+      <condition field="destination_number" expression="^relocker$"/>
+      <condition field="${origination_caller_id_number}" expression="(.*)">
+	<action application="info"/>
+	<action application="sleep" data="500"/>
+	<action application="eval" data="${conference $1-${domain_name} lock}"/>
+      </condition>
+    </extension>
+-->
+
+    <extension name="Add new OB call to conference">
+      <condition field="destination_number" expression="^ASK_FOR_NUMBER__(\d+)$">
+	<action application="play_and_get_digits" data="4 11 1 5000 # ivr/ivr-enter_destination_telephone_number.wav ivr/ivr-that_was_an_invalid_entry.wav target_num \d+"/>
+	<action application="execute_extension" data="ADD_CALL_TO_CONF__${target_num}"/>
+      </condition>
+    </extension>
+
+    <extension name="add that call">
+      <condition field="destination_number" expression="^ADD_CALL_TO_CONF__(\d{4})$" break="on-true">
+        <action application="set" data="new_uuid=${create_uuid foo}" inline="true"/>
+        <action application="hash" data="insert/domain-${domain_name}/last_user_$1/${new_uuid}" />
+        <action application="set" data="res=${bgapi conference ${conference_name} dial ${verto_contact $1}}"/>
+      </condition>
+      <condition field="destination_number" expression="^ADD_CALL_TO_CONF__(\d{11})$" break="on-true">
+        <action application="set" data="new_uuid=${create_uuid foo}" inline="true"/>
+        <action application="hash" data="insert/domain-${domain_name}/last_user_$1/${new_uuid}" />
+        <action application="set" data="res=${bgapi conference ${conference_name} dial sofia/gateway/flowroute/$1}"/>
+      </condition>
+      <condition field="destination_number" expression="^ADD_CALL_TO_CONF__$">
+        <action application="playback" data="ivr/ivr-dude_you_suck.wav"/>
+      </condition>
+    </extension>
+
+    <extension name="make presenter">
+      <condition field="destination_number" expression="make_presenter">
+	<action application="set" data="${conference ${conference_name} vid-res-id ${conference_member_id} presenter}"/>
+	<action application="set" data="screen_member_id=${global_getvar ${conf_screen_3500} conference_member_id}" inline="true"/>
+ 	<action application="set" data="${conference ${conference_name} vid-res-id ${screen_member_id} presenter-screen}"/>
+	<action application="log" data="CRIT this is conference presenter"/>
+	<action application="info"/>
+      </condition>
+    </extension>
+
+
+
+    <!-- dial the FreeSWITCH conference via SIP-->
+    <extension name="freeswitch_public_conf_via_sip">
+      <condition field="destination_number" expression="^9(888|8888|1616|3232)$">
+	<action application="export" data="hold_music=silence"/>
+	<!--
+	     This will take the SAS from the b-leg and send it to the display on the a-leg phone.
+	     Known working with Polycom and Snom maybe others.
+	-->
+	<!--
+	<action application="set" data="exec_after_bridge_app=${sched_api(+4 zrtp expand uuid_display ${uuid} \${uuid_getvar(\${uuid_getvar(${uuid} signal_bond)} zrtp_sas1_string )}  \${uuid_getvar(\${uuid_getvar(${uuid} signal_bond)} zrtp_sas2_string )} )}"/>
+	<action application="export" data="nolocal:zrtp_secure_media=true"/>
+	-->
+	<action application="bridge" data="sofia/${use_profile}/$1@conference.freeswitch.org"/>
+      </condition>
+    </extension>
+
+    <!--
+	This extension will start a conference and invite a group.
+	At anytime the participant can dial *2 to bridge directly to the boss.
+	All other callers are then hung up on.
+    -->
+    <extension name="mad_boss_intercom">
+      <condition field="destination_number" expression="^0911$">
+	<action application="set" data="conference_auto_outcall_caller_id_name=Mad Boss1"/>
+	<action application="set" data="conference_auto_outcall_caller_id_number=0911"/>
+	<action application="set" data="conference_auto_outcall_timeout=60"/>
+	<action application="set" data="conference_auto_outcall_flags=mute"/>
+	<action application="set" data="conference_auto_outcall_prefix={sip_auto_answer=true,execute_on_answer='bind_meta_app 2 a s1 transfer::intercept:${uuid} inline'}"/>
+	<action application="set" data="sip_exclude_contact=${network_addr}"/>
+	<action application="conference_set_auto_outcall" data="${group_call(sales)}"/>
+	<action application="conference" data="madboss_intercom1@default+flags{endconf|deaf}"/>
+      </condition>
+    </extension>
+
+    <!--
+	This extension will start a conference and invite a few of people.
+	At anytime the participant can dial *2 to bridge directly to the boss.
+	All other callers are then hung up on.
+    -->
+    <extension name="mad_boss_intercom">
+      <condition field="destination_number" expression="^0912$">
+	<action application="set" data="conference_auto_outcall_caller_id_name=Mad Boss2"/>
+	<action application="set" data="conference_auto_outcall_caller_id_number=0912"/>
+	<action application="set" data="conference_auto_outcall_timeout=60"/>
+	<action application="set" data="conference_auto_outcall_flags=mute"/>
+	<action application="set" data="conference_auto_outcall_prefix={sip_auto_answer=true,execute_on_answer='bind_meta_app 2 a s1 transfer::intercept:${uuid} inline'}"/>
+	<action application="set" data="sip_exclude_contact=${network_addr}"/>
+	<action application="conference_set_auto_outcall" data="loopback/9664"/>
+	<action application="conference" data="madboss_intercom2@default+flags{endconf|deaf}"/>
+      </condition>
+    </extension>
+
+    <!--This extension will start a conference and invite several people upon entering -->
+    <extension name="mad_boss">
+      <condition field="destination_number" expression="^0913$">
+	<!--These params effect the outcalls made once you join-->
+	<action application="set" data="conference_auto_outcall_caller_id_name=Mad Boss"/>
+	<action application="set" data="conference_auto_outcall_caller_id_number=0911"/>
+	<action application="set" data="conference_auto_outcall_timeout=60"/>
+	<action application="set" data="conference_auto_outcall_flags=none"/>
+	<!--<action application="set" data="conference_auto_outcall_announce=say:You have been called into an emergency conference"/>-->
+	<!--Add as many of these as you need, These are the people you are going to call-->
+	<action application="conference_set_auto_outcall" data="loopback/9664"/>
+	<action application="conference" data="madboss3@default"/>
+      </condition>
+    </extension>
+
+    <!-- a sample IVR  -->
+    <extension name="ivr_demo">
+      <condition field="destination_number" expression="^5000$">
+        <action application="answer"/>
+        <action application="sleep" data="2000"/>
+	<action application="ivr" data="demo_ivr"/>
+      </condition>
+    </extension>
+
+    <!-- Create a conference on the fly and pull someone in at the same time. -->
+    <extension name="dynamic_conference">
+      <condition field="destination_number" expression="^5001$">
+	<action application="conference" data="bridge:mydynaconf:sofia/${use_profile}/1234@conference.freeswitch.org"/>
+      </condition>
+    </extension>
+
+    <extension name="rtp_multicast_page">
+      <condition field="destination_number" expression="^pagegroup$|^7243$">
+	<action application="answer"/>
+	<action application="esf_page_group"/>
+      </condition>
+    </extension>
+
+    <!--
+	 Parking extensions... transferring calls to 5900 will park them in a queue.
+    -->
+    <extension name="park">
+      <condition field="destination_number" expression="^5900$">
+	<action application="set" data="fifo_music=$${hold_music}"/>
+	<action application="fifo" data="5900@${domain_name} in"/>
+      </condition>
+    </extension>
+
+    <!--
+	 Parking pickup extension.  Calling 5901 will pickup the call.
+    -->
+    <extension name="unpark">
+      <condition field="destination_number" expression="^5901$">
+	<action application="answer"/>
+	<action application="fifo" data="5900@${domain_name} out nowait"/>
+      </condition>
+    </extension>
+
+    <!--
+	 Valet park retrieval, works with valet_park extension below.
+	 Retrieve a valet parked call by dialing 6000 + park number + #
+    -->
+    <extension name="valet_park_1">
+      <condition field="destination_number" expression="^(6000)$">
+	<action application="answer"/>
+	<action application="valet_park" data="valet_parking_lot 1"/>
+	<!-- <action application="valet_park" data="valet_parking_lot ask 1 11 10000 ivr/ivr-enter_ext_pound.wav"/> -->
+      </condition>
+    </extension>
+
+    <!--
+	 Valet park 6001-6099.  Blind x-fer to 6001, 6002, etc. to valet park the call.
+	 Dial 6001, 6002, etc. to retrieve a call that is already valet parked.
+	 After call is retrieved, park extension is free for another call.
+    -->
+    <extension name="valet_park_2">
+      <condition field="destination_number" expression="^((?!6000)60\d{2})$">
+	<action application="answer"/>
+	<action application="set" data="valet_hold_music=tone_stream://%(100,15000,800);loops=-1"/>
+	<action application="valet_park" data="valet_parking_lot $1"/>
+      </condition>
+    </extension>
+
+
+    <!--
+	This extension is used with Snom phones.
+
+	Set a function key to park+lot (lot being a number or name.)
+	Set type to Park+Orbit.  You can then park and pickup using
+	the softkey on the phone.  Should work with other phones.
+    -->
+    <extension name="snom_park">
+      <condition field="source" expression="mod_sofia"/>
+      <condition field="destination_number" expression="park\+(\d+)">
+	<action application="fifo" data="$1@${domain_name} in undef $${hold_music}"/>
+      </condition>
+    </extension>
+    <!--
+	The extension is parking pickup with a to param of the fifo we are calling
+	Some phones send things like orbit= and you can extract that info.
+    -->
+    <extension name="snom_unpark">
+      <condition field="source" expression="mod_sofia"/>
+      <condition field="destination_number" expression="^parking$"/>
+      <condition field="${sip_to_params}" expression="fifo\=(\d+)">
+	<action application="answer"/>
+	<action application="fifo" data="$1@${domain_name} out nowait"/>
+      </condition>
+    </extension>
+
+    <!--
+       This extension is used with Linksys phones.
+
+       Set a Phone tab option Call Park Serv to yes. You can park and
+       pickup using soft keys "park" and "unpark" found during
+       active call when moving navigation button. The other option
+       is to use phone's star codes (defaults to *38 and *39).
+    -->
+    <extension name="linksys_park">
+      <condition field="source" expression="mod_sofia"/>
+      <condition field="destination_number" expression="callpark"/>
+      <condition field="${sip_refer_to}">
+	<expression><![CDATA[<sip:callpark@${domain_name};orbit=(\d+)>]]></expression>
+	<action application="fifo" data="$1@${domain_name} in undef $${hold_music}"/>
+      </condition>
+    </extension>
+
+    <!--
+       This extension is used with Linksys phones.
+
+       The extension is parking pickup with a to param of the fifo
+       we are calling. Linksys sends orbit=<parkingslotnumber>
+       and we extract that info.
+    -->
+    <extension name="linksys_unpark">
+      <condition field="source" expression="mod_sofia"/>
+      <condition field="destination_number" expression="pickup"/>
+      <condition field="${sip_to_params}" expression="orbit\=(\d+)">
+	<action application="answer"/>
+	<action application="fifo" data="$1@${domain_name} out nowait"/>
+       </condition>
+    </extension>
+
+    <!--
+	Here are some examples of how to override the ringback heard by the
+	far end.  You have two variables that you can use to override this.
+
+	ringback          - used when a call isn't answered. (early media)
+	transfer_ringback - used when the call is already answered. (post answer)
+    -->
+
+    <!-- Demonstration of how to override the ringback in various situations -->
+    <extension name="wait">
+      <condition field="destination_number" expression="^wait$">
+	<action application="pre_answer"/>
+	<action application="sleep" data="20000"/>
+	<action application="answer"/>
+	<action application="sleep" data="1000"/>
+	<action application="playback" data="voicemail/vm-goodbye.wav"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="fax_receive">
+      <condition field="destination_number" expression="^9178$">
+	<action application="answer" />
+	<action application="set" data="fax_header=${fax_header_custom}" inline="true"/>
+	<action application="set" data="decoded_header=${url_decode(${fax_header_custom)}" inline="true"/>
+	<action application="log" data="warning fax_header=${fax_header}"/>
+	<action application="log" data="warning fax_header_custom=${fax_header_custom}"/>
+	<action application="log" data="warning decoded_header=${decoded_header}"/>
+	<action application="playback" data="silence_stream://2000"/>
+	<action application="rxfax" data="$${temp_dir}/rxfax-${uuid}.tif"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="fax_transmit">
+      <condition field="destination_number" expression="^9179$">
+	<action application="set" data="fax_header=${fax_header_custom}" inline="true"/>
+	<action application="set" data="decoded_header=${url_decode(${fax_header_custom)}" inline="true"/>
+	<action application="log" data="warning fax_header=${fax_header}"/>
+	<action application="log" data="warning fax_header_custom=${fax_header_custom}"/>
+	<action application="log" data="warning decoded_header=${decoded_header}"/>
+	<action application="txfax" data="$${images_dir}/fax.tiff"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <!-- Send a 180 and let the far end generate ringback. -->
+    <extension name="ringback_180">
+      <condition field="destination_number" expression="^9180$">
+	<action application="ring_ready"/>
+	<action application="sleep" data="20000"/>
+	<action application="answer"/>
+	<action application="sleep" data="1000"/>
+	<action application="playback" data="voicemail/vm-goodbye.wav"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <!-- Send a 183 and send uk-ring as the ringtone. (early media) -->
+    <extension name="ringback_183_uk_ring">
+      <condition field="destination_number" expression="^9181$">
+	<action application="set" data="ringback=$${uk-ring}"/>
+	<action application="bridge" data="{ignore_early_media=true}loopback/wait"/>
+      </condition>
+    </extension>
+
+    <!-- Send a 183 and use music as the ringtone. (early media) -->
+    <extension name="ringback_183_music_ring">
+      <condition field="destination_number" expression="^9182$">
+	<action application="set" data="ringback=$${hold_music}"/>
+	<action application="bridge" data="{ignore_early_media=true}loopback/wait"/>
+      </condition>
+    </extension>
+
+    <!-- Answer the call and use music as the ringtone. (post answer) -->
+    <extension name="ringback_post_answer_uk_ring">
+      <condition field="destination_number" expression="^9183$">
+	<action application="set" data="transfer_ringback=$${uk-ring}"/>
+	<action application="answer"/>
+	<action application="bridge" data="{ignore_early_media=true}loopback/wait"/>
+      </condition>
+    </extension>
+
+    <!-- Answer the call and use music as the ringtone. (post answer) -->
+    <extension name="ringback_post_answer_music">
+      <condition field="destination_number" expression="^9184$">
+	<action application="set" data="transfer_ringback=$${hold_music}"/>
+	<action application="answer"/>
+	<action application="bridge" data="{ignore_early_media=true}loopback/wait"/>
+      </condition>
+    </extension>
+
+    <extension name="ClueCon">
+      <condition field="destination_number" expression="^9191$">
+        <action application="set" data="effective_caller_id_name=ClueCon IVR"/>
+        <action application="bridge" data="sofia/$${domain}/2000@bkw.org"/>
+      </condition>
+    </extension>
+
+    <extension name="show_info">
+      <condition field="destination_number" expression="^9192$">
+	<action application="answer"/>
+	<action application="info"/>
+	<action application="sleep" data="250"/>
+	<action application="hangup"/>
+      </condition>
+    </extension>
+
+    <extension name="video_record">
+      <condition field="destination_number" expression="^9193$">
+	<action application="answer"/>
+	<action application="record_fsv" data="$${temp_dir}/testrecord.fsv"/>
+      </condition>
+    </extension>
+
+    <extension name="video_playback">
+      <condition field="destination_number" expression="^9194$">
+	<action application="answer"/>
+	<action application="play_fsv" data="$${temp_dir}/testrecord.fsv"/>
+      </condition>
+    </extension>
+
+    <extension name="milliwatt">
+      <condition field="destination_number" expression="^9197$">
+	<action application="answer"/>
+	<action application="playback" data="{loops=-1}tone_stream://%(251,0,1004)"/>
+      </condition>
+    </extension>
+
+    <extension name="tone_stream">
+      <condition field="destination_number" expression="^9198$">
+	<action application="answer"/>
+	<action application="playback" data="{loops=10}tone_stream://path=${conf_dir}/tetris.ttml"/>
+      </condition>
+    </extension>
+
+    <!-- install zrtp_agent.lua into scripts (ZRTP == 9787) -->
+    <extension name="zrtp_enrollement">
+      <condition field="destination_number" expression="^9787$">
+	<action application="lua" data="zrtp_agent.lua"/>
+      </condition>
+    </extension>
+
+    <!--
+	You will no longer hear the bong tone.  The wav file is playing stating the call is secure.
+	The file will not play unless you have both TLS and SRTP active.
+    -->
+
+    <extension name="hold_music">
+      <condition field="destination_number" expression="^9664$"/>
+      <condition field="${rtp_has_crypto}" expression="^(AES_CM_128_HMAC_SHA1_32|AES_CM_128_HMAC_SHA1_80)$">
+	<action application="answer"/>
+	<action application="execute_extension" data="is_secure XML features"/>
+	<action application="playback" data="$${hold_music}"/>
+	<anti-action application="set" data="zrtp_secure_media=true"/>
+	<anti-action application="answer"/>
+	<anti-action application="playback" data="silence_stream://2000"/>
+	<anti-action application="execute_extension" data="is_zrtp_secure XML features"/>
+	<!-- <anti-action application="playback" data="misc/error.wav"/> -->
+      </condition>
+    </extension>
+
+    <extension name="laugh break">
+      <condition field="destination_number" expression="^9386$">
+        <action application="answer"/>
+        <action application="sleep" data="1500"/>
+        <action application="playback" data="phrase:funny_prompts"/>
+        <action application="hangup"/>
+      </condition>
+    </extension>
+
+<!-- This paging zone can be reached at either 412 or 23412, you can change as you desire, however be sure to change it in the -->
+<!-- catch-all below as well -->
+    <extension name="Intercom Paging Group">
+      <condition field="destination_number" expression="^(412|23412)$" break="never">
+        <!--These params effect the outcalls made once you join-->
+        <!-- First we set the api_hangup_hook to kick everyone from the conference when the initiator hangs up. -->
+        <action application="set" data="api_hangup_hook=conference 412 kick all"/>
+        <action application="answer"/>
+        <action application="export" data="sip_invite_params=intercom=true"/>
+        <action application="export" data="sip_auto_answer=true"/>
+        <!-- If the above exports do not product the desired results, try passing the variables as commented out below -->
+        <!--<action application="conference_set_auto_outcall" data="{sip_auto_answer=true}sofia/gateway/asterlink.com/19184238080"/>-->
+
+        <action application="set" data="conference_auto_outcall_caller_id_name=$${effective_caller_id_name}"/>
+        <action application="set" data="conference_auto_outcall_caller_id_number=$${effective_caller_id_number}"/>
+
+        <!-- Keep the call time down to a few seconds.  If calling phones that don't auto-answer you may want to -->
+        <!-- increase this value to something a bit more persistent than 5 seconds. -->
+        <action application="set" data="conference_auto_outcall_timeout=5"/>
+
+
+        <!--if you don't need to hear the participants, as in a page instead of multi-party intercom -->
+        <!-- then use "mute" instead of "none" as the conference_outcall_flags below. -->
+        <action application="set" data="conference_auto_outcall_flags=none"/>
+
+        <!-- If you'd like to say something to the participant and have cepstral configured and installed, now's the time. -->
+        <!--<action application="set" data="conference_auto_outcall_announce=say:You have been called into an emergency conference"/>-->
+
+        <!--Add as many of these as you need, These are the people you are going to call-->
+        <!-- We have commented these out since we have the list of participants down below as a catch-all in case the caller_id -->
+        <!-- of the initiating party doesn't match the phones being called. -->
+        <!--<action application="conference_set_auto_outcall" data="sofia/gateway/asterlink.com/19184238080"/>-->
+        <!--<action application="conference_set_auto_outcall" data="sofia/default/888@conference.freeswitch.org"/>-->
+      </condition>
+
+      <!-- Now we check to see if this is one of the 7960 phones.  If so we exclude it from the list of -->
+      <!-- extensions to call to avoid the call-waiting annoyance. -->
+      <condition field="caller_id_number" expression="^(233[0-9])$" break="never">
+        <!--<action application="conference_set_auto_outcall" data="user/2335@$${domain}"/>-->
+        <action application="conference_set_auto_outcall" data="user/2345@$${domain}"/>
+        <action application="conference_set_auto_outcall" data="user/2355@$${domain}"/>
+        <!--<action application="conference" data="cool@default"/>-->
+      </condition>
+      <condition field="caller_id_number" expression="^(234[0-9])$" break="never">
+        <action application="conference_set_auto_outcall" data="user/2335@$${domain}"/>
+        <action application="conference_set_auto_outcall" data="user/2355@$${domain}"/>
+      </condition>
+      <condition field="caller_id_number" expression="^(235[0-9])$" break="never">
+        <action application="conference_set_auto_outcall" data="user/2335@$${domain}"/>
+        <action application="conference_set_auto_outcall" data="user/2345@$${domain}"/>
+      </condition>
+
+      <!-- Here is the catch-all whereby if the caller_id matches none of the above we add all the extensions to the list. -->
+      <!-- Please note the use of anti-actions in this condition. -->
+      <condition field="caller_id_number" expression="^(233[0-9]|234[0-9]|235[0-9])$" break="never">
+        <anti-action application="conference_set_auto_outcall" data="user/2335@$${domain}"/>
+        <anti-action application="conference_set_auto_outcall" data="user/2345@$${domain}"/>
+        <anti-action application="conference_set_auto_outcall" data="user/2355@$${domain}"/>
+      </condition>
+      <!-- Now we check the destination again and act accordingly. -->
+      <condition field="destination_number" expression="^(412|23412)$">
+
+        <!-- Please note that you can also designate your own conference bridge instead of default and enable only the options you desire.-->
+        <!-- I have kept the default conference in this example so that you can get this to work before changing the conference to something -->
+        <!-- with your own options enabled.  In this way the example provided here should work and you can fine tune your conference to your -->
+        <!-- desire.  See the config file autoload_configs/conferences.conf.xml for more information on how/what to do or consult the Wiki -->
+
+        <!-- IMPORTANT IMPORTANT IMPORTANT - use ONLY ONE of the two options below -->
+
+        <!-- OPTION 1 -->
+        <!-- If your phones are all isolated from one another (not in the same room, uncomment the following line -->
+        <!-- <action application="conference" data="412@default"/> -->
+
+        <!-- OPTION 2 -->
+        <!-- If you encounter feedback issues use the conference profile given on this page -->
+        <!-- and comment out the application line in OPTION 1 above -->
+        <!-- and un-comment the line below -->
+        <!-- <action application="conference" data="412@intercom"/> -->
+
+
+        <!--After the hangup, we kick everyone in the conference to cause a hangup. -->
+        <!--This shouldn't be necessary since it should be handled above in the api_hangup_hook. -->
+        <action application="conference" data="412 kick all"/>
+      </condition>
+    </extension>
+
+    <!--
+	You can place files in the default directory to get included.
+    -->
+    <X-PRE-PROCESS cmd="include" data="default/*.xml"/>
+
+    <!--
+    <extension name="refer">
+      <condition field="${sip_refer_to}">
+	<expression><![CDATA[<sip:${destination_number}@${domain_name}>]]></expression>
+      </condition>
+      <condition field="${sip_refer_to}">
+	<expression><![CDATA[<sip:(.*)@(.*)>]]></expression>
+	<action application="set" data="refer_user=$1"/>
+	<action application="set" data="refer_domain=$2"/>
+	<action application="info"/>
+	<action application="bridge" data="sofia/${use_profile}/${refer_user}@${refer_domain}"/>
+      </condition>
+    </extension>
+    -->
+    <!--
+	This is an example of how to override the RURI on an outgoing invite to a registered contact.
+    -->
+    <!--
+    <extension name="ruri">
+      <condition field="destination_number" expression="^ruri$">
+	<action application="bridge" data="sofia/${ruri_profile}/${ruri_user}${regex(${sofia_contact(${ruri_contact})}|^[^\@]+(.*)|%1)}"/>
+      </condition>
+    </extension>
+
+    <extension name="7004">
+      <condition field="destination_number" expression="^7004$">
+	<action application="set" data="ruri_profile=default"/>
+	<action application="set" data="ruri_user=2000"/>
+	<action application="set" data="ruri_contact=1001@${domain_name}"/>
+	<action application="execute_extension" data="ruri"/>
+      </condition>
+    </extension>
+    -->
+
+    <extension name="">
+      <condition field="destination_number" expression="^9(.*)$">
+	<action application="answer"/>
+	<action application="eval" data="api_on_answer=${sched_hangup(+10 ${uuid} page_completed)}"/>
+	<action application="bridge" data="api_on_answer=${sched_hangup(+10 ${uuid} page_completed)}user/1006"/>
+	<action application="echo"/>
+      </condition>
+    </extension>
+
+
+    <extension name="transfer myself to public extension">
+      <condition field="destination_number" expression="^9(.*)$">
+	<action application="transfer" data="$1 XML public"/>
+      </condition>
+    </extension>
+
+    <extension name="bridge myself to public profile">
+      <condition field="destination_number" expression="^8(.*)$">
+	<action application="bridge" data="sofia/external/sip:$1@192.168.150.3:5080"/>
+      </condition>
+    </extension>
+
+
+    <extension name="enum">
+      <condition field="${module_exists(mod_enum)}" expression="true"/>
+      <condition field="destination_number" expression="^(.*)$">
+	<action application="transfer" data="$1 enum"/>
+      </condition>
+    </extension>
+
+    <extension name="acknowledge_call">
+      <condition field="destination_number" expression="^(.*)$">
+	<action application="acknowledge_call"/>
+	<action application="ring_ready"/>
+	<action application="playback" data="$${hold_music}"/>
+      </condition>
+    </extension>
+
+  </context>
+
+<!-- modality secure only check -->
+  <!-- <context name="is_secure_verto"> -->
+    <!-- <extension name="is_secure"> -->
+      <!-- <condition field="${rtp_has_crypto}" expression="^srtp:dtls" break="never"> -->
+	<!-- <action application="playback" data="misc/call_secured.wav"/> -->
+	<!-- <anti-action application="playback" data="tone_stream://%(500,500,1000);loops=3"/> -->
+        <!-- <anti-action application="speak" data="flite|slt|This call is unsecure, please try again "/> -->
+      <!-- </condition> -->
+    <!-- </extension> -->
+  <!-- </context> -->
+<!--  -->
+  <!-- <context name="is_secure_sip"> -->
+    <!-- <extension name="is_secure"> -->
+      <!-- <condition field="${rtp_secure_media_negotiated}" expression="^AES" break="never"> -->
+	<!-- <action application="playback" data="misc/call_secured.wav"/> -->
+	<!-- <anti-action application="playback" data="tone_stream://%(500,500,1000);loops=3"/> -->
+        <!-- <anti-action application="speak" data="flite|slt|This call is unsecure, please try again "/> -->
+	<!-- <anti-action application="hangup"/> -->
+      <!-- </condition> -->
+    <!-- </extension>  -->
+  <!-- </context> -->
+<!--  -->
+  <!-- <context name="default"> -->
+<!--  -->
+    <!-- <extension name="check_secure" continue="true"> -->
+      <!-- <condition> -->
+	<!-- <action application="answer"/> -->
+	<!-- <action application="playback" data="tone_stream://%(1000,500,1000);loops=10"/> -->
+      <!-- </condition> -->
+      <!-- <condition field="${source}" expression="^mod_verto$" break="never"> -->
+	<!-- <action application="execute_extension" data="is_secure XML is_secure_verto"/> -->
+      <!-- </condition> -->
+      <!-- <condition field="${source}" expression="^mod_sofia$" break="never"> -->
+	<!-- <action application="execute_extension" data="is_secure XML is_secure_sip"/> -->
+      <!-- </condition> -->
+    <!-- </extension> -->
+<!--  -->
+    <!-- <extension name="test"> -->
+      <!-- <condition field="destination_number" expression="^echo|3246$"> -->
+        <!-- <action application="info"/> -->
+        <!-- <action application="echo"/> -->
+      <!-- </condition> -->
+    <!-- </extension> -->
+<!--  -->
+    <!-- <extension name="test"> -->
+      <!-- <condition field="destination_number" expression="^echo|3246$"> -->
+	<!-- <action application="info"/> -->
+	<!-- <action application="echo"/> -->
+      <!-- </condition> -->
+    <!-- </extension> -->
+
+  <!-- </context> -->
+
+</include>

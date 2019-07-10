@@ -1,0 +1,61 @@
+{
+    "text": "You enjoy the rest of your day. Bye bye now.",
+    "confidence":   0.990000,
+    "engine":       "gcloud_dialogflow",
+    "grammar":      "default",
+    "engine_data":  {
+	"response_id":  "56115c91-7180-4073-ad48-e10a9b9f15d0",
+	"query_result": {
+	    "query_text":   "goodbye",
+	    "language_code":        "en-us",
+	    "speech_recognition_confidence":        0,
+	    "action":       "",
+	    "parameters":   {
+	    },
+	    "all_required_params_present":  true,
+	    "fulfillment_text":     "You enjoy the rest of your day. Bye bye now.",
+	    "fulfillment_messages": [{
+		"text": {
+		    "text": ["You enjoy the rest of your day. Bye bye now."]
+		},
+		"platform":     "PLATFORM_UNSPECIFIED"
+	    }],
+	    "webhook_source":       "",
+	    "output_contexts":      [],
+	    "intent":       {
+		"name": "projects/my-gcloud-agent/agent/intents/e5d1f5fe-dc81-4160-89e8-001ec0547edf",
+		"display_name": "Goodbye",
+		"webhook_state":        "WEBHOOK_STATE_UNSPECIFIED",
+		"priority":     0,
+		"is_fallback":  false,
+		"ml_enabled":   false,
+		"ml_disabled":  false,
+		"end_interaction":      true,
+		"input_context_names":  [],
+		"events":       [],
+		"training_phrases":     [],
+		"action":       "",
+		"output_contexts":      [],
+		"reset_contexts":       false,
+		"parameters":   [],
+		"messages":     [],
+		"default_response_platforms":   [],
+		"root_followup_intent_name":    "",
+		"parent_followup_intent_name":  "",
+		"followup_intent_info": []
+	    },
+	    "intent_detection_confidence":  1,
+	    "diagnostic_info":      {
+		"end_conversation":     true,
+		"webhook_latency_ms":   5000
+	    }
+	},
+	"alternative_query_results":    [],
+	"webhook_status":       {
+	    "code": 4,
+	    "message":      "Webhook call failed. Error: Request timeout.",
+	    "details":      []
+	},
+	"output_audio": ""
+    }
+}

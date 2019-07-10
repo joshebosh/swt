@@ -1,0 +1,60 @@
+<include>
+
+   <!-- <gateway name="signalwire_relay"> -->
+     <!-- <param name="proxy" value="XXXXXX.sip.signalwire.com"/> -->
+     <!-- <param name="register" value="true"/> -->
+     <!-- <param name="username" value="XXXXX"/> -->
+     <!-- <param name="password" value="XXXX"/> -->
+     <!-- <param name="register-transport" value="tcp"/> -->
+     <!-- <param name="realm" value="XXXXXX.sip.signalwire.com"/> -->
+
+     <!-- <param name="caller-id-in-from" value="true"/> -->
+     <!-- <param name="register-proxy" value="XXXXXXXX.sip.signalwire.com"/> -->
+     <!-- <param name="auth-username" value="AAAAA@XXXXXX.sip.signalwire.com"/> -->
+     <!-- <param name="contact-params" value="tport=tcp"/> -->
+   <!-- </gateway> -->
+
+
+  <!-- <gateway name="flowroute"> -->
+    <!-- PHONE CONFIG -->
+    <!-- sip server: sip.flowroute.com -->
+    <!-- sip user id: CID -->
+    <!-- auth id: TECH PREFIX(AUTH NAME) -->
+    <!-- password: TECH PASS -->
+    <!-- <param name="username" value="XXXXXX"/> -->
+    <!-- <param name="auth-username" value="XXXXXXX"/> -->
+    <!-- <param name="password" value="XXXXXX"/> -->
+    <!-- <param name="proxy" value="us-east-va.sip.flowroute.com"/> -->
+    <!-- <param name="expire-seconds" value="30"/> -->
+    <!-- <param name="register" value="false"/> -->
+    <!-- <param name="retry-seconds" value="30"/> -->
+    <!-- <param name="dtmf-type" value="rfc2833"/> -->
+    <!-- <param name="extension-in-contact" value="true"/> -->
+
+    <!-- <variables> -->
+      <!-- <variable name="inbound_chan_var"  value="this is inbound"  direction="inbound"/> -->
+      <!-- <variable name="outbound_chan_var" value="this is outbound" direction="outbound"/> -->
+      <!-- <variable name="both_chan_var"     value="this on any direction"/> -->
+    <!-- </variables> -->
+  <!-- </gateway> -->
+
+  <!-- <gateway name="telnyx"> -->
+    <!-- <param name="realm" value="sip.telnyx.com"/> -->
+    <!-- <param name="username" value="XXXXX"/> -->
+    <!-- <param name="password" value="XXXXXX"/> -->
+    <!-- <param name="register" value="false"/> -->
+    <!-- <variables> -->
+      <!-- <variable name="inbound_chan_var"  value="this is inbound"  direction="inbound"/> -->
+      <!-- <variable name="outbound_chan_var" value="this is outbound" direction="outbound"/> -->
+      <!-- <variable name="both_chan_var"     value="this on any direction"/> -->
+    <!-- </variables> -->
+  <!-- </gateway> -->
+
+  <!-- <gateway name="Twilio-outbound"> -->
+    <!-- <param name="username" value="XXXXXXXX"/> -->
+    <!-- <param name="password" value="XXXXXXXXX" /> -->
+    <!-- <param name="proxy" value="XXXXXXX"/> -->
+    <!-- <param name="register" value="false"/> -->
+  <!-- </gateway> -->
+
+</include>
