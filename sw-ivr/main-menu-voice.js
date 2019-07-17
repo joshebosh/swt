@@ -1,4 +1,4 @@
-const signalwire = require('signalwire');
+const signalwire = require('@signalwire/node');
 var express = require("express");
 var app = express();
 
