@@ -843,7 +843,7 @@ async function sendSMS(sendFrom, sendGroup, sendTo, sendPrice, sendValidity, sen
 		      to: sendTo,
 		      //maxPrice: sendPrice,             // not yet supported on signalwire
 		      //validityPeriod: sendValidity,
-		      applicationSid: sendLaml,        // use LaML's ApplicationSid for message status callbacks
+		      //applicationSid: sendLaml,        // use LaML's ApplicationSid for message status callbacks
 		      //statusCallback: sendStatus,        // or use StatusCallback, takes precedence if ApplicationSid is also specified
 		      body: 'prepended stuff and newline\n ' + sendBody,
 		      //mediaUrl: sendMedia,
