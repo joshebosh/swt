@@ -31,8 +31,8 @@ alias aliasesxmlb='emacs ~/.bash_aliasxmlb.sh && sbashrc'
 alias autoconf='cd /etc/freeswitch/autoload_configs'
 alias autoconfb='cd /usr/local/freeswitch/conf/autoload_configs'
 alias callpaste='fs_cli -x "fsctl send_sighup" \
-&& LogLoc1=/var/log/freeswitch/freeswitch.log \
-&& LogLoc2=/usr/local/freeswitch/log/freeswitch.log \
+&& LogLoc1=/var/log/freeswitch/freeswitch.log.1 \
+&& LogLoc2=/usr/local/freeswitch/log/freeswitch.log.1 \
 && if test -f $LogLoc1; then RESULT=$LogLoc1; \
    elif test -f $LogLoc2; then RESULT=$LogLoc2; \
    else printf "freeswitch.log not found... Log rotation turned on?\n"; printf "try again...\n"; kill $(pidof tcpdump); fi \
@@ -182,3 +182,37 @@ show_ports () {
     printf "local_media_port: %s\n" $LOCAL_AUDIO_PORT
     printf "local_video_port: %s\n" $LOCAL_VIDEO_PORT
 }
+
+
+alias train10='ssh root@192.168.234.10'
+alias train11='ssh root@192.168.234.11'
+alias train12='ssh root@192.168.234.12'
+alias train13='ssh root@192.168.234.13'
+alias train14='ssh root@192.168.234.14'
+alias train15='ssh root@192.168.234.15'
+alias train16='ssh root@192.168.234.16'
+alias train17='ssh root@192.168.234.17'
+alias train18='ssh root@192.168.234.18'
+alias train19='ssh root@192.168.234.19'
+alias train20='ssh root@192.168.234.20'
+alias train21='ssh root@192.168.234.21'
+alias train22='ssh root@192.168.234.22'
+alias train23='ssh root@192.168.234.23'
+alias train24='ssh root@192.168.234.24'
+alias train25='ssh root@192.168.234.25'
+alias train26='ssh root@192.168.234.26'
+alias train27='ssh root@192.168.234.27'
+alias train28='ssh root@192.168.234.28'
+alias train29='ssh root@192.168.234.29'
+alias train30='ssh root@192.168.234.30'
+alias train31='ssh root@192.168.234.31'
+alias train32='ssh root@192.168.234.32'
+alias train33='ssh root@192.168.234.33'
+alias train34='ssh root@192.168.234.34'
+alias train35='ssh root@192.168.234.35'
+alias train36='ssh root@192.168.234.36'
+alias train37='ssh root@192.168.234.37'
+alias train38='ssh root@192.168.234.38'
+alias train39='ssh root@192.168.234.39'
+alias train40='ssh root@192.168.234.40'
+alias train41='ssh root@192.168.234.41'
