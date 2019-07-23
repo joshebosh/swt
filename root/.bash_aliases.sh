@@ -4,6 +4,9 @@
 #
 ########################
 
+alias epop='emacs --eval "(find-file \"/usr/src/swt.git/SignalWire_SMS/index.html\")" --eval "(search-forward \"gwd.pop\")" '
+alias epopjs='emacs --eval "(find-file \"/usr/src/swt.git/SignalWire_SMS/index.js\")" --eval "(search-forward \"function get_vars\")" '
+
 
 alias fsdirs='freeswitch -h > /tmp/fshelp.txt; \
 /usr/src/freeswitch.git/configure -h > /tmp/fsconfigure.txt; \

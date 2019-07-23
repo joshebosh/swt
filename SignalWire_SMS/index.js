@@ -11,6 +11,7 @@
     npm install util --save
     npm install process --save
     npm install child_process --save
+    npm install os --save
 */
 
 // use strict syntax checking to help find common errors
@@ -40,6 +41,15 @@ var privkey;
 var cert;
 var fullchain;
 
+// for getting local ip
+const os = require('os');
+const lip = os.networkInterfaces();
+ip='lip.ens18[0].address'; // automatically detect IP
+
+// for getting external ip
+const { execSync } = require('child_process');
+const eip = execSync('curl --silent ifconfig.me')
+
 /******************************
  setup your personal variables
 ******************************/
@@ -51,7 +61,7 @@ function get_vars() {
     sport='3001';
 
     // your local ip address of your server
-    ip='';
+    //ip='192.168.234.x';      // manually choose IP
 
     // your space name url
     su='example.signalwire.com';
@@ -126,7 +136,7 @@ function get_vars() {
 
 
 
-/*
+
 ////////////////////////////////////////////////
 // START MINIMUM SERVER FOR OUTGOING MESSAGE
 ////////////////////////////////////////////////
@@ -151,7 +161,7 @@ signalwire.messages
 //////////////////////////////////////////
 // END MINIMUM SERVER FOR OUTGOING MESSAGE
 //////////////////////////////////////////
-*/
+
 
 
 
@@ -191,10 +201,12 @@ server.get("/sendSMS", function (req,res) {
 });
 
 server.listen(port, ip);
-console.log('now listening on port ' + port + ' at ip ' + ip);
-console.log('\nGo to this url in browser to the server is working:\n  \x1b[33m%s\x1b[0m',  'http://' + ip + ':' + port + '/sendSMS?testing=cool%20it%20works')
-console.log("\nor issue this curl command in another terminal to view the same:\n  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + ip + ":" + port + "/sendSMS?testing=cool%20it%20works")
-console.log('\nsend an sms to \x1b[33m%s\x1b[0m and view node console log', pn)
+console.log('now listening on port \x1b[33m' + port + '\x1b[0m at ip \x1b[33m' + ip + '\x1b[0m and external ip \x1b[33m' + eip + '\x1b[0m');
+console.log('\nGo to this url in browser to test the server is working:\n  \x1b[33m%s\x1b[0m',  'http://' + ip + ':' + port + '/sendSMS?testing=cool%20it%20works');
+console.log('  \x1b[33m%s\x1b[0m',  'http://' + eip + ':' + port + '/sendSMS?testing=cool%20it%20works')
+console.log("\nor issue this curl command in another terminal to view the same:\n  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + ip + ":" + port + "/sendSMS?testing=cool%20it%20works");
+console.log("  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + eip + ":" + port + "/sendSMS?testing=cool%20it%20works");
+console.log('\nsend an sms to \x1b[33m%s\x1b[0m and view node console log', pn);
 ////////////////////////////////////////////////////////
 // END MINIMUM SERVER FOR GET REQUESTS - INCOMING MESSAGE
 ////////////////////////////////////////////////////////
@@ -237,12 +249,14 @@ server.get("/sendSMS", function (req,res) {
 if ((ip !== "SERVER_IP_HERE" ) && ( port !== '' )) {
     server.listen(port, ip);
     console.log('now listening on port ' + port + ' at ip ' + ip);
-    console.log("\nGo to this url in browser and see LaML generation and make sure it's working:\n  \x1b[33m%s\x1b[0m",  "http://" + ip + ":" + port + "/sendSMS")
-    console.log("\nOr issue this curl command in another terminal to see LaML generation is working:\n  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + ip + ":" + port + "/sendSMS")
-    console.log('\nGo to SignalWire dashboard \x1b[33mPhone Number > Edit Settings > WHEN A MESSAGE COMES IN:\x1b[0m and set url to \x1b[33mhttp://' + ip + ':3000/sendSMS\x1b[0m')
-    console.log('\nNow send an sms to \x1b[33m%s\x1b[0m and await the auto-reply\n', pn)
-} else {
-    console.log("ERROR: Please give variables \"ip=" + ip + "\" and \"port=" + port + "\" proper values")
+    console.log("\nGo to this url in browser and see LaML generation and make sure it's working:\n  \x1b[33m%s\x1b[0m",  "http://" + ip + ":" + port + "/sendSMS");
+    console.log("  \x1b[33m%s\x1b[0m",  "http://" + eip + ":" + port + "/sendSMS");
+    console.log("\nOr issue this curl command in another terminal to see LaML generation is working:\n  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + ip + ":" + port + "/sendSMS");
+    console.log("  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + eip + ":" + port + "/sendSMS");
+    console.log('\nGo to SignalWire dashboard \x1b[33mPhone Number > Edit Settings > WHEN A MESSAGE COMES IN:\x1b[0m and set url to:');
+    console.log('    \x1b[33mhttp://' + eip + ':' + port + '/sendSMS\x1b[0m');
+    console.log('\nNow send an sms to \x1b[33m%s\x1b[0m and await the auto-reply\n', pn)} else {
+    console.log("ERROR: Please give variables \"ip=" + ip + "\" and \"port=" + port + "\" proper values");
 }
 ///////////////////////////////////////////////////////////////////
 // END MINIMUM SERVER FOR INCOMING MESSAGE AUTO REPLY - GET REQUEST
@@ -282,10 +296,6 @@ const signalwire = new RestClient( pk, at, { signalwireSpaceUrl: su });
 // needed for POST requests
 const bp = require('body-parser');
 server.use(bp.urlencoded({ extended: true }));
-
-// needed to get external ip for help/log print outs when starting server. Not really used in nodejs functions.
-const { execSync } = require('child_process');
-var eip = execSync('curl --silent ifconfig.me')
 
 // declare a var to keep track of somebody's number who is intiating an sms to me.
 // In real world, this might be a database call. But a global var for training will do
@@ -376,20 +386,23 @@ if ((ip !== "SERVER_IP_HERE" ) && ( port !== '' )) {
     // gives you alot of info when starting up
     console.log('NodeJs is listening on port \x1b[33m' + port + '\x1b[0m with local ip \x1b[33m' + ip + '\x1b[0m, and your external ip is \x1b[33m' + eip +'\x1b[0m\n');
     console.log('\nIn your Signalwire dashboard, you need to create a LaML Bin and put this LaML code in the bin.\nThis will only work if your port is forwarded from router to server.\n\n' +
-		'\x1b[33m<Response>\n' +
-		'  <Redirect method="POST">http://' + eip + ':' + port + '/sendSMS</Redirect>\n' +
-		'</Response>\x1b[0m\n\n' +
-		'Copy the bin link from the bins list page, go edit your Phone Number and paste in for \x1b[33mWHEN A MESSAGE COMES IN:\x1b[0m webhook\n' +
-		'Choose the POST method dropdown. Now your SignalWire number will hit the LaML Bin first, and the bin will redirect message to your server.\n' +
-		'This is needed for capturing \x1b[33mFrom\x1b[0m, \x1b[33mTo\x1b[0m, and \x1b[33mBody\x1b[0m values from other people initiating sms, and passing it on to you.')
-    console.log('Also, We need to remember who they are in order to send sms back to them. That why "initiator=" variable exists.')
-    console.log("\nFor POST request from browser address bar, paste this full string:\n  \x1b[33m%s\x1b[0m",  "data:text/html,<body onload=\"document.body.firstChild.submit()\"><form method=\"post\" action=\"http://" + ip + ":" + port + "/sendSMS\"><input type=\"text\" name=\"Body\" value=\"testing\">")
-    console.log('\nOr issue this curl command in another terminal:\n  \x1b[33mcurl -X POST -d "Body=Testing" %s\x1b[0m',  'http://' + ip + ':' + port + '/sendSMS')
-    console.log('\nFor a full duplex (x4 SMS) test, have classmate send an sms to \x1b[33m%s\x1b[0m. And you reply. Both parties numbers should be masked by your SignalWire number.', pn)
-    console.log('\nWhen someone sends SMS to your SW number, it forwards to your cell. You have 5 minutes to respond, or else the remembrance of initiators number will reset.')
-    console.log('You can manually reset the rembrance before the 5 minutes lapses by sending all caps \x1b[33mRESET\x1b[0m to your SW number. Then you are free to iniate SMS to whomever else.')
-    console.log('The format for iniating an SMS from your cell is \x1b[33m+NUMBER@MESSAGE\x1b[0m i.e. \x1b[33m+1888551212@This is my message\x1b[0m\n')
-} else {
+                '\x1b[33m<Response>\n' +
+                '  <Redirect method="POST">http://' + eip + ':' + port + '/sendSMS</Redirect>\n' +
+                '</Response>\x1b[0m\n\n' +
+                'Copy the bin link from the bins list page, go edit your Phone Number and paste in for \x1b[33mWHEN A MESSAGE COMES IN:\x1b[0m webhook\n' +
+                'Choose the POST method dropdown. Now your SignalWire number will hit the LaML Bin first, and the bin will redirect message to your server.\n' +
+                'This is needed for capturing \x1b[33mFrom\x1b[0m, \x1b[33mTo\x1b[0m, and \x1b[33mBody\x1b[0m values from other people initiating sms, and passing it on to you.');
+    console.log('Also, We need to remember who they are in order to send sms back to them. That why "initiator=" variable exists.');
+    console.log("\nFor POST request from browser address bar, paste this full string:");
+    console.log("\x1b[33m%s\x1b[0m",  "  data:text/html,<body onload=\"document.body.firstChild.submit()\"><form method=\"post\" action=\"http://" + ip + ":" + port + "/sendSMS\"><input type=\"text\" name=\"Body\" value=\"testing\">");
+    console.log("\x1b[33m%s\x1b[0m",  "  data:text/html,<body onload=\"document.body.firstChild.submit()\"><form method=\"post\" action=\"http://" + eip + ":" + port + "/sendSMS\"><input type=\"text\" name=\"Body\" value=\"testing\">");
+    console.log('\nOr issue this curl command in another terminal:\n  \x1b[33mcurl -X POST -d "Body=Testing" %s\x1b[0m',  'http://' + ip + ':' + port + '/sendSMS');
+    console.log('  \x1b[33mcurl -X POST -d "Body=Testing" %s\x1b[0m',  'http://' + eip + ':' + port + '/sendSMS');
+    console.log('\nFor a full duplex (x4 SMS) test, have classmate send an sms to \x1b[33m%s\x1b[0m. And you reply. Both parties numbers should be masked by your SignalWire number.', pn);
+    console.log('\nWhen someone sends SMS to your SW number, it forwards to your cell. You have 5 minutes to respond, or else the remembrance of initiators number will reset.');
+    console.log('You can manually reset the rembrance before the 5 minutes lapses by sending all caps \x1b[33mRESET\x1b[0m to your SW number. Then you are free to iniate SMS to whomever else.');
+    console.log('The format for iniating an SMS from your cell is \x1b[33m+NUMBER@MESSAGE\x1b[0m i.e. \x1b[33m+1888551212@This is my message\x1b[0m\n');
+   } else {
     console.log("ERROR: Please give variables \"ip=" + ip + "\" and \"port=" + port + "\" proper values")
 }
 //////////////////////////////////////////////////////////////////////
@@ -424,12 +437,6 @@ const express = require('express');
 const server = express();
 const { RestClient } = require('@signalwire/node');
 const signalwire = new RestClient(pk, at, { signalwireSpaceUrl: su })
-
-//
-// needed to get external ip for help/log print outs when starting server. Not really used in nodejs functions.
-//
-const { execSync } = require('child_process');
-var eip = execSync('curl --silent ifconfig.me')
 
 //
 // setup needed for parsing the body of POST statusCallbacks, GET alone does not require this
@@ -559,9 +566,9 @@ if ((ip !== "SERVER_IP_HERE" ) && ( port !== '' )) {
     console.log('NodeJs is listening on port \x1b[33m' + port + '\x1b[0m with local ip \x1b[33m' + ip + '\x1b[0m, and your external ip is \x1b[33m' + eip +'\x1b[0m\n');
 
     console.log('For this callbacks section to work properly, you will need to setup up a LaML App in your dashboard.\n' +
-		'    LaML > Apps > WHEN A MESSAGE COMES IN: \x1b[33mhttp://' + eip + ':' + port + '/laml\x1b[0m\n' +
-		'    and           WHEN A MESSAGE IS DELIVERED: \x1b[33mhttp://' + eip + ':' + port + '/status\x1b[0m\n' +
-		'For the delivery METHOD, either GET or POST should work. Be sure to try them both.\n')
+                '    LaML > Apps > WHEN A MESSAGE COMES IN: \x1b[33mhttp://' + eip + ':' + port + '/laml\x1b[0m\n' +
+                '    and           WHEN A MESSAGE IS DELIVERED: \x1b[33mhttp://' + eip + ':' + port + '/status\x1b[0m\n' +
+                'For the delivery METHOD, either GET or POST should work. Be sure to try them both.\n')
     console.log('You will need to find the LaML App Sid from the apps list page and fill in the \x1b[33mla = ?\x1b[0m nodejs variable so param \x1b[33mApplicationSid\x1b[0m will work.')
     console.log('And also be sure to fill in the \x1b[33mcb = ?\x1b[0m variable with \x1b[33mhttp://' + eip + ':' + port + '/status\x1b[0m so the \x1b[33mStatusCallback\x1b[0m param will work.')
 
@@ -569,26 +576,31 @@ if ((ip !== "SERVER_IP_HERE" ) && ( port !== '' )) {
 
     console.log('This section can hanlde incoming messages, but is intended primarily for outbound messages from curl or browser bar to showcase status callbacks.')
 
-    console.log("\nFor GET request from browser address bar, paste this full string:\n  \x1b[33m%s\x1b[0m",  "http://" + ip + ":" + port + "/laml?Body=This%20is%20a%20browser%20GET%20test")
+    console.log("\nFor GET request from browser address bar, paste this full string:");
+    console.log("  \x1b[33m%s\x1b[0m",  "http://" + ip + ":" + port + "/laml?Body=This%20is%20a%20browser%20GET%20test")
+    console.log("  \x1b[33m%s\x1b[0m",  "http://" + eip + ":" + port + "/laml?Body=This%20is%20a%20browser%20GET%20test")
 
-    console.log("\nFor POST request from browser address bar, paste this full string:\n  \x1b[33m%s\x1b[0m",  "data:text/html,<body onload=\"document.body.firstChild.submit()\"><form method=\"post\" action=\"http://" + ip + ":" + port + "/laml\"><input type=\"text\" name=\"Body\" value=\"this is a browser POST test\">")
+    console.log("\nFor POST request from browser address bar, paste this full string:");
+    console.log("  \x1b[33m%s\x1b[0m",  "data:text/html,<body onload=\"document.body.firstChild.submit()\"><form method=\"post\" action=\"http://" + ip + ":" + port + "/laml\"><input type=\"text\" name=\"Body\" value=\"this is a browser POST test\">")
+    console.log("  \x1b[33m%s\x1b[0m",  "data:text/html,<body onload=\"document.body.firstChild.submit()\"><form method=\"post\" action=\"http://" + eip + ":" + port + "/laml\"><input type=\"text\" name=\"Body\" value=\"this is a browser POST test\">")
 
     console.log("\nOr issue this curl GET command in another terminal:")
 
-    console.log("\n  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + ip + ":" + port + "/laml?Body=This%20is%20a%20curl%20GET%20test")
+    console.log("  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + ip + ":" + port + "/laml?Body=This%20is%20a%20curl%20GET%20test")
+    console.log("  \x1b[33mcurl -X GET %s\x1b[0m",  "http://" + eip + ":" + port + "/laml?Body=This%20is%20a%20curl%20GET%20test")
 
     console.log("\nand/or for curl POST")
 
-    console.log('\n  \x1b[33mcurl -X POST --data-urlencode "Body=This is a curl POST test" %s\x1b[0m',  'http://' + ip + ':' + port + '/laml\n')
+    console.log('  \x1b[33mcurl -X POST --data-urlencode "Body=This is a curl POST test" %s\x1b[0m',  'http://' + ip + ':' + port + '/laml')
+    console.log('  \x1b[33mcurl -X POST --data-urlencode "Body=This is a curl POST test" %s\x1b[0m',  'http://' + eip + ':' + port + '/laml\n')
 
     console.log('To thoroughly test this section for ensuring all call back types are working you would:\n' +
-		'    1. Uncomment and set \x1b[33mla = ?\x1b[0m var in server, set in dashboard \x1b[33mLaML App > DELIVERED > METHOD > GET\x1b[0m, do a browser or curl test\n' +
-		'         and see (3) GET callbacks. (1) for \x1b[33mqueued\x1b[0m (1) for \x1b[33msent\x1b[0m, and (1) for \x1b[33mdelivered\x1b[0m. Might possibly see a \x1b[33mfailure\x1b[0m depending\n' +
+                '    1. Uncomment and set \x1b[33mla = ?\x1b[0m var in server, set in dashboard \x1b[33mLaML App > DELIVERED > METHOD > GET\x1b[0m, do a browser or curl test\n' +
+                '         and see (3) GET callbacks. (1) for \x1b[33mqueued\x1b[0m (1) for \x1b[33msent\x1b[0m, and (1) for \x1b[33mdelivered\x1b[0m. Might possibly see a \x1b[33mfailure\x1b[0m depending\n' +
                 '    2. Change your \x1b[33mLaML App > DELIVERD > METHOD > POST\x1b[0m, send another browser/curl test, watch for (3) POST callbacks\n' +
- 		'    3. Comment \x1b[33mla = ?\x1b[0m, uncomment and set \x1b[33mcb = \'http://'+ eip + ':' + port + '/status\'\x1b[0m and test again.\n' +
-		'When using \x1b[33mApplicationSid\x1b[0m (var la), callback method can be GET or POST. When using \x1b[33mStatusCallback\x1b[0m (var cb), it is POST only.\n' +
-		'if you are specifying both in your REST API request to SignalWire, the StatusCallback will be honored, and the other ignored\n')
-} else {
+                '    3. Comment \x1b[33mla = ?\x1b[0m, uncomment and set \x1b[33mcb = \'http://'+ eip + ':' + port + '/status\'\x1b[0m and test again.\n' +
+                'When using \x1b[33mApplicationSid\x1b[0m (var la), callback method can be GET or POST. When using \x1b[33mStatusCallback\x1b[0m (var cb), it is POST only.\n' +
+                'if you are specifying both in your REST API request to SignalWire, the StatusCallback will be honored, and the other ignored\n')  } else {
   console.log("ERROR: Please give variables \"ip=" + ip + "\" and \"port=" + port + "\" proper values")
 }
 /////////////////////////////////////////////////////////
@@ -602,7 +614,7 @@ if ((ip !== "SERVER_IP_HERE" ) && ( port !== '' )) {
 
 
 
-
+/*
 //////////////////////////////////////////////////////////
 // START MINIMUM SERVER FOR CLIENT WEBSOCKET COMMUNICATION
 //////////////////////////////////////////////////////////
@@ -625,11 +637,6 @@ var reqStatus;
 var reqBody;
 var reqMedia;
 
-//
-// get external ip for help/log print outs when starting server. Not used in any nodejs functions.
-//
-const { execSync } = require('child_process');
-var eip = execSync('curl --silent ifconfig.me')
 
 //
 // function call to get personal vars.
@@ -1095,3 +1102,4 @@ console.log('Search the code comments for "CORS" if you run into those type erro
 ////////////////////////////////////////////////////////
 // END MINIMUM SERVER FOR CLIENT WEBSOCKET COMMUNICATION
 ////////////////////////////////////////////////////////
+*/
