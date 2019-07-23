@@ -51,22 +51,22 @@ function get_vars() {
     sport='3001';
 
     // your local ip address of your server
-    ip='192.168.X.X';
+    ip='';
 
     // your space name url
     su='example.signalwire.com';
 
     // your project key
-    pk='XXXXXXXX';
+    pk='';
 
     // your api token
-    at='XXXXXXXXXX';
+    at='';
 
     // your signalwire phone number
-    pn='+1XXXXXXXXX';
+    pn='+1NPANNXXXXX';
 
     // your cellphone number
-    cn='+1XXXXXXXXXX';
+    cn='+1NPANNXXXXX';
 
     // body of sms message
     sms = 'welcome to signalwire';
@@ -476,7 +476,7 @@ function sendSMS(req, res) {
     // if both are uncommented, statusCallback will take priority
 
     // OPTIONAL: your LaML Application Sid, can be GET or POST in dashboard
-    //la=''
+    //la='<LAML_APP_SID>'
 
     // OPTIONAL: your own callback url, is POST only
     //cb='http://example.com:3000/status'
