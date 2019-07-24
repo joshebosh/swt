@@ -1,4 +1,3 @@
-root/.ssh/config
 root/.ssh/known_hosts
 root/.ssh/known_hosts.old
 root/.fs_cli_history

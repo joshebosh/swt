@@ -1,0 +1,119 @@
+#/root/.screenrc
+
+startup_message off
+escape ^\b
+bindkey ^H stuff meta
+
+defscrollback 8000
+# status line at the bottom
+hardstatus on
+hardstatus alwayslastline
+hardstatus string "%{.GW}%-w%{.rW}%f%n %t%{-}%+w %=%{..G}[%H %l] %{..Y} %m/%d %c "
+
+screen -t bash 10 bash
+stuff train10^M
+
+screen -t bash 11 bash
+stuff train11^M
+
+screen -t bash 12 bash
+stuff train12^M
+
+screen -t bash 13 bash
+stuff train13^M
+
+screen -t bash 14 bash
+stuff train14^M
+
+screen -t bash 15 bash
+stuff train15^M
+
+screen -t bash 16 bash
+stuff train16^M
+
+screen -t bash 17 bash
+stuff train17^M
+
+screen -t bash 18 bash
+stuff train18^M
+
+screen -t bash 19 bash
+stuff train19^M
+
+screen -t bash 20 bash
+stuff train20^M
+
+screen -t bash 21 bash
+stuff train21^M
+
+screen -t bash 22 bash
+stuff train22^M
+
+screen -t bash 23 bash
+stuff train23^M
+
+screen -t bash 24 bash
+stuff train24^M
+
+screen -t bash 25 bash
+stuff train25^M
+
+screen -t bash 26 bash
+stuff train26^M
+
+screen -t bash 27 bash
+stuff train27^M
+
+screen -t bash 28 bash
+stuff train28^M
+
+screen -t bash 29 bash
+stuff train29^M
+
+screen -t bash 30 bash
+stuff train30^M
+
+screen -t bash 31 bash
+stuff train31^M
+
+screen -t bash 32 bash
+stuff train32^M
+
+screen -t bash 33 bash
+stuff train33^M
+
+screen -t bash 34 bash
+stuff train34^M
+
+screen -t bash 35 bash
+stuff train35^M
+
+screen -t bash 36 bash
+stuff train36^M
+
+screen -t bash 37 bash
+stuff train37^M
+
+screen -t bash 38 bash
+stuff train38^M
+
+screen -t bash 39 bash
+stuff train39^M
+
+screen -t bash 40 bash
+stuff train40^M
+
+screen -t bash 41 bash
+stuff train41^M
+
+
+bindkey "^[^@" focus    # ctrl + alt + space
+bind ^? eval "clear" "scrollback 0" "scrollback 15000" "stuff ^M"
+
+# PUTTY
+bindkey "^[^[[C" next    # alt + shift + ri arrow
+bindkey "^[^[[D" prev     # alt + shift + le arrow
+
+# CHROME
+bindkey "^[[1;8C" next    # alt + shift + ri arrow
+bindkey "^[[1;8D" prev     # alt + shift + le arrow
