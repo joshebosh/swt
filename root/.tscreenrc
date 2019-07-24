@@ -2,7 +2,7 @@
 
 startup_message off
 escape ^\b
-bindkey ^H stuff meta
+bindkey ^H meta
 
 defscrollback 8000
 # status line at the bottom

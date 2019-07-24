@@ -2,6 +2,8 @@
 
 startup_message off
 escape ^\b
+bindkey ^H stuff meta
+
 defscrollback 8000
 # status line at the bottom
 hardstatus on
