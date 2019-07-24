@@ -39,6 +39,10 @@ bindkey "^[^[[D" prev     # alt + shift + le arrow
 bindkey "^[[1;8C" next    # alt + shift + ri arrow
 bindkey "^[[1;8D" prev     # alt + shift + le arrow
 
+# training screens
+bindkey "^[[1;4C" next   # alt + shift + le arrow
+bindkey "^[[1;4D" prev   # alt + shift + le arrow
+
 # Putty
 bindkey "^[[11~" layout select F1
 bindkey "^[[12~" layout select F2
