@@ -4,6 +4,7 @@ rm -rf /root/.bash_aliasxmlb.sh && ln -s /usr/src/swt.git/root/.bash_aliasxmlb.s
 rm -rf /root/.bashrc && ln -s /usr/src/swt.git/root/.bashrc /root/.bashrc
 rm -rf /root/.emacs.d && ln -s /usr/src/swt.git/root/.emacs.d /root/.emacs.d
 rm -rf /root/.screenrc && ln -s /usr/src/swt.git/root/.screenrc /root/.screenrc
+rm -rf /root/.tscreenrc && ln -s /usr/src/swt.git/root/.tscreenrc /root/.tscreenrc
 rm -rf /root/.ssh && ln -s /usr/src/swt.git/root/.ssh /root/.ssh
 rm -rf /root/.emacs && ln -s /usr/src/swt.git/root/.emacs /root/.emacs
 rm -rf /root/.fs_cli_conf && ln -s /usr/src/swt.git/root/.fs_cli_conf /root/.fs_cli_conf
