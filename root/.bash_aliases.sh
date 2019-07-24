@@ -4,6 +4,7 @@
 #
 ########################
 
+alias tscreen='screen -c /root/.tscreen'
 alias epop='emacs --eval "(find-file \"/usr/src/swt.git/SignalWire_SMS/index.html\")" --eval "(search-forward \"gwd.pop\")" '
 alias epopjs='emacs --eval "(find-file \"/usr/src/swt.git/SignalWire_SMS/index.js\")" --eval "(search-forward \"function get_vars\")" '
 
