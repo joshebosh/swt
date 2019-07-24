@@ -8,7 +8,7 @@ defscrollback 8000
 # status line at the bottom
 hardstatus on
 hardstatus alwayslastline
-hardstatus string "%{.GW}%-w%{.rW}%f%n %t%{-}%+w %=%{..G}[%H %l] %{..Y} %m/%d %c "
+hardstatus string "%{.GK}%-w%{.rW}%f%n %t%{-}%+w %=%{..G}[%H %l] %{..Y} %m/%d %c "
 
 screen -t bash 10 bash
 stuff train10^M
