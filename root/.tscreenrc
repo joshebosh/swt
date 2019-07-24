@@ -119,5 +119,5 @@ bindkey "^[[1;8C" next    # alt + shift + ri arrow
 bindkey "^[[1;8D" prev     # alt + shift + le arrow
 
 # training screens
-bindkey "^[[1;4D" prev   # alt + shift + le arrow
+bindkey "^[[1;4C" prev   # alt + shift + le arrow
 bindkey "^[[1;4D" prev   # alt + shift + le arrow
