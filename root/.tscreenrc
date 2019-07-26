@@ -117,3 +117,17 @@ bindkey "^[^[[D" prev     # alt + shift + le arrow
 # CHROME
 bindkey "^[[1;8C" next    # alt + shift + ri arrow
 bindkey "^[[1;8D" prev     # alt + shift + le arrow
+
+# send input to all windows
+bindkey "^[[1;2P" at '10#' stuff 'swt && git add --all && git commit -am updates && git push'^M #shift + F1
+bindkey "^[[1;2Q" at '#' stuff 'swtupdate'^M #shift + F2
+bindkey "^[[1;2R" at '#' stuff 'test3'^M #shift + F3
+bindkey "^[[1;2S" at '#' stuff 'test4'^M #shift + F4
+bindkey "^[[15;2~" at '#' stuff 'test5'^M #shift + F5
+bindkey "^[[17;2~" at '#' stuff 'test6'^M #shift + F6
+bindkey "^[[18;2~" at '#' stuff 'test7'^M #shift + F7
+bindkey "^[[19;2~" at '#' stuff 'test8'^M #shift + F8
+bindkey "^[[20;2~" at '#' stuff 'test9'^M #shift + F9
+bindkey "^[[21;2~" at '#' stuff 'test10'^M #shift + F10
+bindkey "^[[23;2~" at '#' stuff 'test11'^M #shift + F11
+bindkey "^[[24;2~" at '#' stuff 'test12'^M #shift + F12

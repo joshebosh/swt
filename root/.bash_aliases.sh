@@ -4,6 +4,7 @@
 #
 ########################
 
+alias etscreen='emacs /root/.tscreenrc'
 alias tscreen='screen -c /root/.tscreenrc'
 alias epop='emacs --eval "(find-file \"/usr/src/swt.git/SignalWire_SMS/index.html\")" --eval "(search-forward \"gwd.pop\")" '
 alias epopjs='emacs --eval "(find-file \"/usr/src/swt.git/SignalWire_SMS/index.js\")" --eval "(search-forward \"function get_vars\")" '
@@ -97,7 +98,9 @@ alias fslog1='less /var/log/freeswitch/freeswitch.log.1'
 alias fsxml='less -N /var/log/freeswitch/freeswitch.xml.fsxml'
 alias fsxmlb='less -N /usr/local/freeswitch/log/freeswitch.xml.fsxml'
 alias fss='cd /usr/src/freeswitch.git/'
+alias swt='swt.git'
 alias swt.git='cd /usr/src/swt.git/'
+alias swtupdate='pushd /usr/src/swt.git && git pull && popd'
 alias freeswitch.service='emacs /lib/systemd/system/freeswitch.service'
 alias freeswitchb.service='emacs /lib/systemd/system/freeswitchb.service'
 alias both.service='emacs --eval "(find-file \"/lib/systemd/system/freeswitch.service\")" -f split-window-horizontally -f other-window --eval "(find-file \"/lib/systemd/system/freeswitchb.service\")"'
