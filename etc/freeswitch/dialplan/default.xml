@@ -47,6 +47,36 @@
       </condition>
     </extension>
 
+    <extension name="signalwire_sms_curl">
+      <condition field="destination_number" expression="^792$">
+
+	<!-- setup bleg uuid of this call so we we know it before hand -->
+	<action application="set" inline="true" data="bleg_uuid=${create_uuid()}"/>
+
+	<!-- setup signalwire credentials -->
+	<action application="set" inline="true" data="space_name=SPACE_NAME"/>
+	<action application="set" inline="true" data="project_key=PROJECT_KEY"/>
+	<action application="set" inline="true" data="api_token=API_TOKEN"/>
+
+	<!-- not using '+' here, just the 11 digit number itself, see curl line below -->
+	<action application="set" inline="true" data="signalwire_number=SIGNALWIRE_NUMBER"/>
+	<action application="set" inline="true" data="cellphone=CUSTOMER_NUMBER"/>
+
+	<!-- urlencode your 'spaces' to '%20' so the text body will work in the url, may need to consider other untested puncuations -->
+	<action application="set" inline="true" data="sms_body=${system(printf 'aleg ${uuid} is calling bleg ${bleg_uuid}' | sed -r 's/ /%20/g')}"/>
+
+	<!-- We need to base64 encode the basic authorization -->
+	<action application="set" inline="true" data="auth=${system(printf '${project_key}:${api_token}' | base64 --wrap 0)}"/>
+
+	<!-- notice for E.164 formatting we encode the '+' to '%2B' for the 'From' and 'To' params on the URL -->
+	<action application="curl" data="https://${space_name}.signalwire.com/api/laml/2010-04-01/Accounts/${project_key}/Messages.json?From=%2B${signalwire_number}&To=%2B${cellphone}&Body=${sms_body} append_headers Authorization:'basic ${auth}' post"/>
+
+	<action application="hangup"/>
+	<!-- <action application="answer"/> -->
+	<!-- <action application="bridge" data="{origination_uuid=${bleg_uuid}}user/1004"/> -->
+      </condition>
+    </extension>
+
     <extension name="nested_example">
       <condition field="destination_number" expression="^2901$" require-nested="false">
 	<action application="log" data="ERR 1 Nest Level 1a"/>
@@ -90,7 +120,7 @@
       </condition>
     </extension>
 
-    <extension name="fax hearder">
+    <extension name="fax header">
       <condition field="destination_number" expression="^(9999999.*)$">
 	<action application="answer"/>
 	<!-- <action application="set" data="fax_header_custom=To: Test's Recipient      From: Keith X'Murray" inline="true"/> -->

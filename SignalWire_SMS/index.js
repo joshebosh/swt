@@ -85,7 +85,6 @@ function get_vars() {
     //privkey = '/etc/letsencrypt/live/XXXX/privkey.pem';
     //cert = '/etc/letsencrypt/live/XXXX/cert.pem';
     //fullchain = '/etc/letsencrypt/live/XXXX/fullchain.pem';
-
 }
 
 
@@ -143,7 +142,7 @@ function get_vars() {
 // THIS WILL CHARGE ACCOUNT FOR ONE OUTBOUND SMS
 ////////////////////////////////////////////////
 
-// function call to get peronal vars.
+// function call to get personal vars.
 if (typeof get_vars === "function") {
     get_vars()
 }

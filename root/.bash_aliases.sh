@@ -4,6 +4,7 @@
 #
 ########################
 
+alias tcommand='read -p "command(s): " COMMAND && screen -X at "#" stuff "$COMMAND"^M'
 alias etscreen='emacs /root/.tscreenrc'
 alias tscreen='screen -c /root/.tscreenrc'
 alias epop='emacs --eval "(find-file \"/usr/src/swt.git/SignalWire_SMS/index.html\")" --eval "(search-forward \"gwd.pop\")" '
