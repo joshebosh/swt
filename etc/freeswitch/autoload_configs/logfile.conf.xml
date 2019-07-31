@@ -34,7 +34,7 @@
       </settings>
       <mappings>
 	<map name="switch_loadable_module.c" value="all"/>
-	<map name="mod_avmd.c" value="all"/> -->
+	<map name="mod_avmd.c" value="all"/>
         <map name="avmd_report_detection" value="all"/>
       </mappings>
     </profile>-->

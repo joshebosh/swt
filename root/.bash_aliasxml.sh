@@ -53,9 +53,11 @@ fsbt () {
 	gdb -ex "set logging file /tmp/backtrace.log" \
 	    -ex "set logging on" \
 	    -ex "set pagination off" \
+	    -ex "bt" \
+	    -ex "bt full" \
+	    -ex "info threads" \
 	    -ex "thread apply all bt" \
 	    -ex "thread apply all bt full" \
-	    -ex "info threads" \
 	    -ex "detach" \
 	    -ex "quit" \
 	    /usr/bin/freeswitch /tmp/core.$1 \
@@ -68,9 +70,11 @@ fsbt () {
 	    -ex "set logging file /tmp/backtrace.log" \
 	    -ex "set logging on" \
 	    -ex "set pagination off" \
+	    -ex "bt" \
+	    -ex "bt full" \
+	    -ex "info threads" \
 	    -ex "thread apply all bt" \
 	    -ex "thread apply all bt full" \
-	    -ex "info threads" \
 	    -ex "detach" \
 	    -ex "quit" \
 	    && printf "\n\n\n" \
