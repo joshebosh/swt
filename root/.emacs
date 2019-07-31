@@ -15,10 +15,10 @@
 ;
 
 (add-to-list 'load-path "~/.emacs.d/joshebosh/")
-(load "auto-dim-other-buffers")
-(add-hook 'after-init-hook (lambda ()
- (when (fboundp 'auto-dim-other-buffers-mode)
-  (auto-dim-other-buffers-mode t))))
+;(load "auto-dim-other-buffers")
+;(add-hook 'after-init-hook (lambda ()
+; (when (fboundp 'auto-dim-other-buffers-mode)
+;  (auto-dim-other-buffers-mode t))))
 
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
@@ -55,6 +55,8 @@
 ;      (other-window)
 ;      (kill-buffer shell)
 ;)
+
+(global-set-key (kbd "<backtab>") `other-window)
 
 
 (global-set-key (kbd "C-c C-k C-c") 'xmlc)
@@ -320,15 +322,15 @@
                         (time-to-seconds (time-since before-init-time))
                         ,my-init-time
                         (file-name-nondirectory user-init-file)))))
-(custom-set-variables
+;;(custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
-(custom-set-faces
+;; )
+;;(custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(auto-dim-other-buffers-face ((t (:background "magenta")))))
+;; '(auto-dim-other-buffers-face ((t (:background "magenta")))))

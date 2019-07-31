@@ -4,6 +4,14 @@
 #
 ########################
 
+
+alias spymap='emacs \
+--eval "(find-file \"/etc/freeswitch/dialplan/default.xml\")" --eval "(search-forward \"spymap\")" \
+-f split-window-vertically \
+-f other-window \
+--eval "(search-forward \"spymap\")" \
+'
+
 alias tcommand='read -p "command(s): " COMMAND && screen -X at "#" stuff "$COMMAND"^M'
 alias etscreen='emacs /root/.tscreenrc'
 alias tscreen='screen -c /root/.tscreenrc'
@@ -36,7 +44,8 @@ alias aliasxmlb='aliasesxmlb'
 alias aliasesxmlb='emacs ~/.bash_aliasxmlb.sh && sbashrc'
 alias autoconf='cd /etc/freeswitch/autoload_configs'
 alias autoconfb='cd /usr/local/freeswitch/conf/autoload_configs'
-alias callpaste='fs_cli -x "fsctl send_sighup" \
+alias callpaste='DATE=$(date +"%Y-%m-%d-%H-%M") \
+&& fs_cli -x "fsctl send_sighup" \
 && LogLoc1=/var/log/freeswitch/freeswitch.log.1 \
 && LogLoc2=/usr/local/freeswitch/log/freeswitch.log.1 \
 && if test -f $LogLoc1; then RESULT=$LogLoc1; \
@@ -46,7 +55,7 @@ alias callpaste='fs_cli -x "fsctl send_sighup" \
 && fs_cli -x "fsctl send_sighup" \
 && printf "#############################################\n\n\n\n\n" \
 && curl -d private=1 --data-urlencode text@$RESULT https://pastebin.freeswitch.org/api/create \
-&& printf "\nhttp://$(curl -s ifconfig.me)/capture-$DATE.pcap\n\n" \
+&& printf "\nhttp://"$(hostname -I | tr -d " ")"/capture-$DATE.pcap\n\n" \
 && printf "\n\n\n\n#############################################\n\n"' \
 || fs_cli -x "fsctl send_sighup"
 #
@@ -101,7 +110,7 @@ alias fsxmlb='less -N /usr/local/freeswitch/log/freeswitch.xml.fsxml'
 alias fss='cd /usr/src/freeswitch.git/'
 alias swt='swt.git'
 alias swt.git='cd /usr/src/swt.git/'
-alias swtupdate='pushd /usr/src/swt.git && git pull && popd'
+alias swtupdate='pushd /usr/src/swt.git && git pull && exec bash && popd'
 alias freeswitch.service='emacs /lib/systemd/system/freeswitch.service'
 alias freeswitchb.service='emacs /lib/systemd/system/freeswitchb.service'
 alias both.service='emacs --eval "(find-file \"/lib/systemd/system/freeswitch.service\")" -f split-window-horizontally -f other-window --eval "(find-file \"/lib/systemd/system/freeswitchb.service\")"'

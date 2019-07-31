@@ -13,8 +13,8 @@
       <variable name="outbound_caller_id_name" value="$${outbound_caller_name}"/>
       <variable name="outbound_caller_id_number" value="$${outbound_caller_id}"/>
       <variable name="callgroup" value="sales"/>
-      <variable name="nibble_rate" value="1.5"/>
-      <variable name="nibble_account" value="1001"/>
+      <!--<variable name="nibble_rate" value="1.5"/>-->
+      <!--<variable name="nibble_account" value="1001"/>-->
     </variables>
   </user>
 </include>

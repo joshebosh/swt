@@ -25,7 +25,7 @@
 	<map name="all" value="console,debug,info,notice,warning,err,crit,alert"/>
       </mappings>
     </profile>
-    <profile name="reload-mods">
+    <!--<profile name="reload-mods">
       <settings>
 	<param name="logfile" value="/var/log/freeswitch/reload-mods.log"/>
 	<param name="rollover" value="1048576"/>
@@ -34,9 +34,9 @@
       </settings>
       <mappings>
 	<map name="switch_loadable_module.c" value="all"/>
-	<!-- <map name="mod_avmd.c" value="all"/> -->
-        <!-- <map name="avmd_report_detection" value="all"/>  -->
+	<map name="mod_avmd.c" value="all"/> -->
+        <map name="avmd_report_detection" value="all"/>
       </mappings>
-    </profile>
+    </profile>-->
   </profiles>
 </configuration>

@@ -58,11 +58,11 @@ fsbt () {
 	    -ex "info threads" \
 	    -ex "detach" \
 	    -ex "quit" \
-	    /usr/bin/freeswitch /tmp/fs.core.$1 \
+	    /usr/bin/freeswitch /tmp/core.$1 \
 	    && printf "\n\n\n" \
 	    && curl -d private=1 --data-urlencode text@/tmp/backtrace.log https://pastebin.freeswitch.org/api/create \
 	    && printf "\n\n\n" \
-	    && rm /tmp/fs.core.$1
+	    && rm /tmp/core.$1
     else # for when freeswitch freezes/hangs
 	gdb -ex "attach $(pidof -s freeswitch)" \
 	    -ex "set logging file /tmp/backtrace.log" \
@@ -81,7 +81,7 @@ fsbt () {
 
 alias fscrash='FSPID=$(pidof -s freeswitch) && echo $FSPID > /tmp/fsa.pid && fs_cli -x "fsctl crash" && fsbt $FSPID'
 
-alias btready='cd /tmp && ulimit -c unlimited && sysctl -w kernel.core_pattern=/tmp/fs.core.%p && apt-get install -y gdb curl libfreeswitch1-dbg'
+alias btready='cd /tmp && ulimit -c unlimited && sysctl -w kernel.core_pattern=/tmp/core.%p && apt-get install -y gdb curl libfreeswitch1-dbg freeswitch-all-dbg'
 
 alias gitready='rm -f /etc/freeswitch/.git; cd /etc/freeswitch && git init && git add --all && git commit -am "initial commit" && git log'
 
@@ -142,8 +142,10 @@ source_logfile () {
 
 alias rlogtarg='rotate_logtarg'
 rotate_logtarg () {
-    if [ -f /var/log/freeswitch/reload-mods.log.1 ]; then
+    if [ -f /var/log/freeswitch/freeswitch.log.1 ]; then
+	rm -f /var/log/freeswitch/freeswitch.log
 	rm -f /var/log/freeswitch/freeswitch.log.{1,2,3}
+	rm -f /var/log/freeswitch/reload-mods.log
 	rm -f /var/log/freeswitch/reload-mods.log.{1,2,3}
 	fs_cli -x "reload mod_logfile"
     fi
@@ -197,10 +199,10 @@ kill_logtarg () {
     sleep 1
     screen -X focus bottom
     sleep 1
-    screen -X select 3
-    sleep 1
-    screen -X stuff ^C"clear"^M
-    sleep 1
+    #screen -X select 3
+    #sleep 1
+    #screen -X stuff ^C"clear"^M
+    #sleep 1
     screen -X layout select F1
     sleep 1
     screen -X select 0
@@ -221,6 +223,13 @@ logfile_target () {
     sleep 1
     screen -X select 5
     sleep 1
+    if [ -f /var/log/freeswitch/freeswitch.log.1 ]; then
+	rm -f /var/log/freeswitch/freeswitch.log
+	rm -f /var/log/freeswitch/freeswitch.log.{1,2,3}
+	rm -f /var/log/freeswitch/reload-mods.log
+	rm -f /var/log/freeswitch/reload-mods.log.{1,2,3}
+	fs_cli -x "reload mod_logfile"
+    fi
     screen -X stuff "cd /var/log/freeswitch; ls"^M
     sleep 1
     screen -X focus bottom
@@ -231,7 +240,10 @@ logfile_target () {
 alias rlogger='rotate_logger'
 rotate_logger () {
     if [ -f /var/log/freeswitch/freeswitch.log.1 ]; then
+	rm -f /var/log/freeswitch/freeswitch.log
 	rm -f /var/log/freeswitch/freeswitch.log.{1,2,3}
+	rm -f /var/log/freeswitch/reload-mods.log
+	rm -f /var/log/freeswitch/reload-mods.log.{1,2,3}
 	fs_cli -x "reload mod_logfile"
     fi
     screen -X layout select F3
@@ -312,6 +324,13 @@ logfile_profiles () {
     sleep 1
     screen -X select 5
     sleep 1
+    if [ -f /var/log/freeswitch/freeswitch.log.1 ]; then
+	rm -f /var/log/freeswitch/freeswitch.log
+	rm -f /var/log/freeswitch/freeswitch.log.{1,2,3}
+	rm -f /var/log/freeswitch/reload-mods.log
+	rm -f /var/log/freeswitch/reload-mods.log.{1,2,3}
+	fs_cli -x "reload mod_logfile"
+    fi
     screen -X stuff "cd /var/log/freeswitch; ls"^M
     sleep 1
     screen -X focus bottom

@@ -1228,6 +1228,7 @@
     </extension>
 
     <extension name="Local_Extension">
+      <!--<condition field="${open}" expression="^true$"/>-->
       <condition field="destination_number" expression="^(10[01][0-9])$">
 	<action application="export" data="dialed_extension=$1"/>
 	<!-- bind_meta_app can have these args <key> [a|b|ab] [a|b|o|s] <app> -->
@@ -1249,6 +1250,8 @@
 	<action application="hash" data="insert/${domain_name}-last_dial_ext/global/${uuid}"/>
 	<!--<action application="export" data="nolocal:rtp_secure_media=${user_data(${dialed_extension}@${domain_name} var rtp_secure_media)}"/>-->
 	<action application="hash" data="insert/${domain_name}-last_dial/${called_party_callgroup}/${uuid}"/>
+	<!--<action application="info"/>-->
+	<!--<action application="set" data="bridge_pre_execute_bleg_app=info"/>-->
 	<action application="bridge" data="user/${dialed_extension}@${domain_name}"/>
 	<action application="answer"/>
 	<action application="sleep" data="1000"/>
@@ -1459,8 +1462,8 @@
     </extension>
 
     <extension name="group_dial_sales">
-      <condition field="destination_number" expression="^2000$">
-	<action application="bridge" data="${group_call(sales@${domain_name})}"/>
+      <condition field="destination_number" expression="^sales|2000$">
+	<action application="bridge" data="${group_call(sales@${domain_name}+F)}"/>
       </condition>
     </extension>
 
