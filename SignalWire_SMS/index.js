@@ -44,47 +44,52 @@ var fullchain;
 // for getting local ip
 const os = require('os');
 const lip = os.networkInterfaces();
-ip='lip.ens18[0].address'; // automatically detect IP
+//ip='lip.ens18[0].address'; // automatically detect IP
 
 // for getting external ip
 const { execSync } = require('child_process');
 const eip = execSync('curl --silent ifconfig.me')
+
+const dotenv = require('dotenv');
+dotenv.config();
 
 /******************************
  setup your personal variables
 ******************************/
 function get_vars() {
     // your local port
-    port='3000';
+    port = process.env.PORT
 
     // local https port
-    sport='3001';
+    sport = process.env.SECURE_PORT
 
     // your local ip address of your server
-    //ip='192.168.234.x';      // manually choose IP
+    //ip=lip.ens18[0].address; // for numbers proxmox
+    //ip=lip.enp4s0[0].address; // for ezra baremetal
+    ip = process.env.IP
 
     // your space name url
-    su='example.signalwire.com';
+    su = process.env.SPACE_URL
 
     // your project key
-    pk='';
+    pk = process.env.PROJECT_KEY
 
     // your api token
-    at='';
+    at = process.env.API_TOKEN
 
     // your signalwire phone number
-    pn='+1NPANNXXXXX';
+    pn = process.env.PHONE_NUMBER
 
     // your cellphone number
-    cn='+1NPANNXXXXX';
+    cn = process.env.CELL_NUMBER
 
     // body of sms message
-    sms = 'welcome to signalwire';
+    sms = process.env.SMS_BODY
 
     // specify paths to your certs
-    //privkey = '/etc/letsencrypt/live/XXXX/privkey.pem';
-    //cert = '/etc/letsencrypt/live/XXXX/cert.pem';
-    //fullchain = '/etc/letsencrypt/live/XXXX/fullchain.pem';
+    //privkey = process.env.PRIVKEY
+    //cert = process.env.CERT
+    //fullchain = process.env.FULLCHAIN
 }
 
 
