@@ -4,3 +4,4 @@ root/.ssh/known_hosts.old
 root/.fs_cli_history
 root/.ssh/id_rsa_swt
 root/.ssh/id_rsa_swt.pub
+SignalWire/.env
